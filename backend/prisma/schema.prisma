@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  phone     String?
+  bio       String?
+  skills    String[]
+  resume    String?
+  resumeOriginalName String?
+  profilePhoto String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  companies     Company[]
+  jobsCreated   Job[]        @relation("JobCreator")
+  applications  Application[]
+
+  @@index([email])
+}
+
+model Company {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  website     String?
+  location    String?
+  logo        String?
+  industry    String?
+  companySize CompanySize?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs        Job[]
+
+  @@index([userId])
+  @@index([name])
+}
+
+model Job {
+  id              String          @id @default(uuid())
+  title           String
+  description     String
+  requirements    String[]
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String          @default("USD")
+  location        String
+  jobType         JobType
+  experienceLevel ExperienceLevel
+  positions       Int             @default(1)
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  companyId       String
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdById     String
+  createdBy       User            @relation("JobCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  applications    Application[]
+
+  @@index([companyId])
+  @@index([createdById])
+  @@index([title])
+  @@index([jobType])
+}
+
+model Application {
+  id          String            @id @default(uuid())
+  status      ApplicationStatus @default(PENDING)
+  appliedAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relations
+  applicantId String
+  applicant   User   @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  jobId       String
+  job         Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([applicantId, jobId])
+  @@index([applicantId])
+  @@index([jobId])
+  @@index([status])
+}
+
+// Enums
+enum Role {
+  USER
+  RECRUITER
+  ADMIN
+}
+
+enum CompanySize {
+  SIZE_1_10
+  SIZE_11_50
+  SIZE_51_200
+  SIZE_201_500
+  SIZE_501_1000
+  SIZE_1000_PLUS
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  REMOTE
+}
+
+enum ExperienceLevel {
+  ENTRY
+  MID
+  SENIOR
+  LEAD
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
