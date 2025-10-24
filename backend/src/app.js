@@ -9,7 +9,7 @@ const logger = require('./utils/logger');
 // Import routes
 const userRoutes = require('./routes/user.routes');
 const companyRoutes = require('./routes/company.routes');
-const jobRoutes = require('./routes/job.routes');
+const employerRoutes = require('./routes/employer.routes');
 
 const app = express();
 
@@ -49,7 +49,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/companies', companyRoutes);
-app.use('/api/v1/jobs', jobRoutes);
+app.use('/api/v1/employer', employerRoutes);
 
 // 404 handler
 app.use((req, res) => {

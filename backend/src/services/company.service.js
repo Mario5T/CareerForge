@@ -3,7 +3,7 @@ const { AppError } = require('../utils/errorHandler');
 
 // Create company
 exports.createCompany = async (companyData) => {
-  const { name, userId } = companyData;
+  const { name, description, website, location, logo, industry, companySize } = companyData;
 
   // Check if company name already exists
   const existingCompany = await prisma.company.findUnique({
@@ -15,15 +15,14 @@ exports.createCompany = async (companyData) => {
   }
 
   const company = await prisma.company.create({
-    data: companyData,
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
+    data: {
+      name,
+      description,
+      website,
+      location,
+      logo,
+      industry,
+      companySize,
     },
   });
 
@@ -61,11 +60,15 @@ exports.getAllCompanies = async (filters = {}) => {
       skip,
       take: parseInt(limit),
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+        employers: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         },
         _count: {
@@ -93,15 +96,32 @@ exports.getCompanyById = async (companyId) => {
   const company = await prisma.company.findUnique({
     where: { id: companyId },
     include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
+      employers: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       },
       jobs: {
         where: { isActive: true },
+        include: {
+          employer: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
         select: {
           id: true,
           title: true,
@@ -123,15 +143,17 @@ exports.getCompanyById = async (companyId) => {
 
 // Update company
 exports.updateCompany = async (companyId, updateData, userId) => {
-  const company = await prisma.company.findUnique({
-    where: { id: companyId },
+  // Check if user is an employer of this company
+  const employer = await prisma.employer.findUnique({
+    where: {
+      userId_companyId: {
+        userId,
+        companyId,
+      },
+    },
   });
 
-  if (!company) {
-    throw new AppError('Company not found', 404);
-  }
-
-  if (company.userId !== userId) {
+  if (!employer) {
     throw new AppError('Not authorized to update this company', 403);
   }
 
@@ -139,11 +161,15 @@ exports.updateCompany = async (companyId, updateData, userId) => {
     where: { id: companyId },
     data: updateData,
     include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
+      employers: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       },
     },
@@ -154,6 +180,20 @@ exports.updateCompany = async (companyId, updateData, userId) => {
 
 // Delete company
 exports.deleteCompany = async (companyId, userId) => {
+  // Check if user is an employer of this company
+  const employer = await prisma.employer.findUnique({
+    where: {
+      userId_companyId: {
+        userId,
+        companyId,
+      },
+    },
+  });
+
+  if (!employer) {
+    throw new AppError('Not authorized to delete this company', 403);
+  }
+
   const company = await prisma.company.findUnique({
     where: { id: companyId },
   });
@@ -162,11 +202,105 @@ exports.deleteCompany = async (companyId, userId) => {
     throw new AppError('Company not found', 404);
   }
 
-  if (company.userId !== userId) {
-    throw new AppError('Not authorized to delete this company', 403);
-  }
-
   await prisma.company.delete({
     where: { id: companyId },
   });
+};
+
+// Add new functions for employer management
+exports.addEmployerToCompany = async (companyId, userId, employerData) => {
+  // Check if company exists
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+  });
+
+  if (!company) {
+    throw new AppError('Company not found', 404);
+  }
+
+  // Check if user already exists as employer for this company
+  const existingEmployer = await prisma.employer.findUnique({
+    where: {
+      userId_companyId: {
+        userId,
+        companyId,
+      },
+    },
+  });
+
+  if (existingEmployer) {
+    throw new AppError('User is already an employer for this company', 400);
+  }
+
+  const employer = await prisma.employer.create({
+    data: {
+      userId,
+      companyId,
+      ...employerData,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      company: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return employer;
+};
+
+exports.removeEmployerFromCompany = async (companyId, userId) => {
+  // Check if user is an employer of this company
+  const employer = await prisma.employer.findUnique({
+    where: {
+      userId_companyId: {
+        userId,
+        companyId,
+      },
+    },
+  });
+
+  if (!employer) {
+    throw new AppError('User is not an employer for this company', 404);
+  }
+
+  await prisma.employer.delete({
+    where: {
+      userId_companyId: {
+        userId,
+        companyId,
+      },
+    },
+  });
+};
+
+exports.getCompanyEmployers = async (companyId) => {
+  const employers = await prisma.employer.findMany({
+    where: {
+      companyId,
+      isActive: true,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+    orderBy: { joinedAt: 'desc' },
+  });
+
+  return employers;
 };

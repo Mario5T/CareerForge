@@ -27,7 +27,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  companies     Company[]
+  employers     Employer[]
   jobsCreated   Job[]        @relation("JobCreator")
   applications  Application[]
 
@@ -48,12 +48,31 @@ model Company {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobs        Job[]
+  employers     Employer[]
+  jobs          Job[]
 
-  @@index([userId])
   @@index([name])
+}
+
+model Employer {
+  id        String   @id @default(uuid())
+  title     String?  // Job title/position within the company
+  department String?
+  isActive  Boolean  @default(true)
+  joinedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  jobs      Job[]
+
+  @@unique([userId, companyId])
+  @@index([userId])
+  @@index([companyId])
 }
 
 model Job {
@@ -73,13 +92,16 @@ model Job {
   updatedAt       DateTime        @updatedAt
 
   // Relations
-  companyId       String
-  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdById     String
-  createdBy       User            @relation("JobCreator", fields: [createdById], references: [id], onDelete: Cascade)
-  applications    Application[]
+  companyId     String
+  company       Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employerId    String
+  employer      Employer        @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  createdById   String
+  createdBy     User            @relation("JobCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  applications  Application[]
 
   @@index([companyId])
+  @@index([employerId])
   @@index([createdById])
   @@index([title])
   @@index([jobType])

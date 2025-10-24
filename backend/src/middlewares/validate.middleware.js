@@ -59,6 +59,7 @@ exports.companyValidation = {
     body('description').optional().trim(),
     body('website').optional().isURL().withMessage('Invalid URL'),
     body('location').optional().trim(),
+    body('logo').optional().trim(),
     body('industry').optional().trim(),
     body('companySize')
       .optional()
@@ -77,6 +78,72 @@ exports.companyValidation = {
     body('description').optional().trim(),
     body('website').optional().isURL().withMessage('Invalid URL'),
     body('location').optional().trim(),
+    body('logo').optional().trim(),
+    body('industry').optional().trim(),
+    body('companySize')
+      .optional()
+      .isIn([
+        'SIZE_1_10',
+        'SIZE_11_50',
+        'SIZE_51_200',
+        'SIZE_201_500',
+        'SIZE_501_1000',
+        'SIZE_1000_PLUS',
+      ])
+      .withMessage('Invalid company size'),
+  ],
+  addEmployer: [
+    body('userId').isUUID().withMessage('Valid user ID is required'),
+    body('title').optional().trim(),
+    body('department').optional().trim(),
+  ],
+  removeEmployer: [
+    body('userId').isUUID().withMessage('Valid user ID is required'),
+  ],
+};
+
+exports.employerValidation = {
+  createCompanyProfile: [
+    body('companyName').trim().notEmpty().withMessage('Company name is required'),
+    body('companyDescription').optional().trim(),
+    body('companyWebsite').optional().isURL().withMessage('Invalid company URL'),
+    body('companyLocation').optional().trim(),
+    body('companyLogo').optional().trim(),
+    body('companyIndustry').optional().trim(),
+    body('companySize')
+      .optional()
+      .isIn([
+        'SIZE_1_10',
+        'SIZE_11_50',
+        'SIZE_51_200',
+        'SIZE_201_500',
+        'SIZE_501_1000',
+        'SIZE_1000_PLUS',
+      ])
+      .withMessage('Invalid company size'),
+    body('title').optional().trim(),
+    body('department').optional().trim(),
+  ],
+  updateCompanyProfile: [
+    body('companyName').optional().trim(),
+    body('companyDescription').optional().trim(),
+    body('companyWebsite').optional().isURL().withMessage('Invalid company URL'),
+    body('companyLocation').optional().trim(),
+    body('companyLogo').optional().trim(),
+    body('companyIndustry').optional().trim(),
+    body('companySize')
+      .optional()
+      .isIn([
+        'SIZE_1_10',
+        'SIZE_11_50',
+        'SIZE_51_200',
+        'SIZE_201_500',
+        'SIZE_501_1000',
+        'SIZE_1000_PLUS',
+      ])
+      .withMessage('Invalid company size'),
+    body('title').optional().trim(),
+    body('department').optional().trim(),
   ],
 };
 
@@ -88,6 +155,9 @@ exports.jobValidation = {
       .optional()
       .isArray()
       .withMessage('Requirements must be an array'),
+    body('salaryMin').optional().isInt({ min: 0 }).withMessage('Salary minimum must be positive'),
+    body('salaryMax').optional().isInt({ min: 0 }).withMessage('Salary maximum must be positive'),
+    body('salaryCurrency').optional().isString(),
     body('location').trim().notEmpty().withMessage('Location is required'),
     body('jobType')
       .isIn(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'REMOTE'])
@@ -95,7 +165,6 @@ exports.jobValidation = {
     body('experienceLevel')
       .isIn(['ENTRY', 'MID', 'SENIOR', 'LEAD'])
       .withMessage('Invalid experience level'),
-    body('companyId').notEmpty().withMessage('Company ID is required'),
     body('positions')
       .optional()
       .isInt({ min: 1 })
@@ -108,11 +177,30 @@ exports.jobValidation = {
       .trim()
       .notEmpty()
       .withMessage('Job description cannot be empty'),
+    body('requirements')
+      .optional()
+      .isArray()
+      .withMessage('Requirements must be an array'),
+    body('salaryMin').optional().isInt({ min: 0 }).withMessage('Salary minimum must be positive'),
+    body('salaryMax').optional().isInt({ min: 0 }).withMessage('Salary maximum must be positive'),
+    body('salaryCurrency').optional().isString(),
     body('location')
       .optional()
       .trim()
       .notEmpty()
       .withMessage('Location cannot be empty'),
+    body('jobType')
+      .optional()
+      .isIn(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'REMOTE'])
+      .withMessage('Invalid job type'),
+    body('experienceLevel')
+      .optional()
+      .isIn(['ENTRY', 'MID', 'SENIOR', 'LEAD'])
+      .withMessage('Invalid experience level'),
+    body('positions')
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage('Positions must be at least 1'),
   ],
   updateApplicationStatus: [
     body('status')
