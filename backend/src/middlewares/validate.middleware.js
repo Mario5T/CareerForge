@@ -3,25 +3,49 @@ const { errorResponse } = require('../utils/response');
 
 /**
  * Validate request using express-validator
+ *
+ * Usage:
+ * - As factory: `validate(rulesArray)` where `rulesArray` is an array of validators
+ *   e.g. router.post('/', validate(companyValidation.create), controller)
+ * - Backwards-compatible: `validate` can also be used as middleware directly
  */
-exports.validate = (req, res, next) => {
-  const errors = validationResult(req);
+exports.validate = (rules) => {
+  // If called as validate(rulesArray), return an array of middleware: the rules followed by the result checker
+  if (Array.isArray(rules)) {
+    return [
+      ...rules,
+      (req, res, next) => {
+        const errors = validationResult(req);
 
-  if (!errors.isEmpty()) {
-    const extractedErrors = errors.array().map((err) => ({
-      field: err.param,
-      message: err.msg,
-    }));
+        if (!errors.isEmpty()) {
+          const extractedErrors = errors.array().map((err) => ({
+            field: err.param,
+            message: err.msg,
+          }));
 
-    return errorResponse(
-      res,
-      400,
-      'Validation failed',
-      extractedErrors
-    );
+          return errorResponse(res, 400, 'Validation failed', extractedErrors);
+        }
+
+        next();
+      },
+    ];
   }
 
-  next();
+  // If used directly as middleware (no rules passed), behave like before
+  return (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      const extractedErrors = errors.array().map((err) => ({
+        field: err.param,
+        message: err.msg,
+      }));
+
+      return errorResponse(res, 400, 'Validation failed', extractedErrors);
+    }
+
+    next();
+  };
 };
 
 /**
