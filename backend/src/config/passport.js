@@ -5,6 +5,14 @@ const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL } = require(
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET, JWT_EXPIRE } = require('./env');
 
+// Validate important OAuth environment variables early to provide a clear error
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+  console.error('\nMissing Google OAuth configuration: `GOOGLE_CLIENT_ID` and/or `GOOGLE_CLIENT_SECRET` are not set.');
+  console.error('Create a `.env` file in the backend directory (or export the variables) with these keys:');
+  console.error('\n  GOOGLE_CLIENT_ID=your-google-client-id\n  GOOGLE_CLIENT_SECRET=your-google-client-secret\n  GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback\n');
+  throw new Error('Missing Google OAuth credentials. See backend/OAUTH_SETUP.md for setup instructions.');
+}
+
 // Serialize user for session
 passport.serializeUser((user, done) => {
   done(null, user.id);
