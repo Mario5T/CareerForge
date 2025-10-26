@@ -2,14 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const session = require('express-session');
+const passport = require('./config/passport');
 const { errorHandler } = require('./utils/errorHandler');
-const { CORS_ORIGIN } = require('./config/env');
+const { CORS_ORIGIN, SESSION_SECRET } = require('./config/env');
 const logger = require('./utils/logger');
 
 // Import routes
 const userRoutes = require('./routes/user.routes');
 const companyRoutes = require('./routes/company.routes');
 const employerRoutes = require('./routes/employer.routes');
+const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 
@@ -23,6 +26,23 @@ app.use(
     credentials: true,
   })
 );
+
+// Session middleware
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Body parser
 app.use(express.json());
@@ -50,6 +70,7 @@ app.get('/health', (req, res) => {
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/employer', employerRoutes);
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -14,7 +14,7 @@ model User {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
-  password  String
+  password  String?  // Made optional for OAuth users
   role      Role     @default(USER)
   phone     String?
   bio       String?
@@ -26,12 +26,18 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // OAuth fields
+  googleId  String?  @unique
+  provider  String?  // 'google', 'local', etc.
+  avatar    String?  // Profile picture from OAuth provider
+
   // Relations
   employers     Employer[]
   jobsCreated   Job[]        @relation("JobCreator")
   applications  Application[]
 
   @@index([email])
+  @@index([googleId])
 }
 
 model Company {

@@ -1,0 +1,127 @@
+const passport = require('passport');
+const oauthService = require('../services/oauth.service');
+const { successResponse, errorResponse } = require('../utils/response');
+const logger = require('../utils/logger');
+
+/**
+ * Initiate Google OAuth login
+ */
+exports.googleLogin = (req, res, next) => {
+  try {
+    // Store the return URL if provided
+    if (req.query.returnUrl) {
+      req.session.returnUrl = req.query.returnUrl;
+    }
+
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+    })(req, res, next);
+  } catch (error) {
+    logger.error(`Google login initiation error: ${error.message}`);
+    errorResponse(res, 500, 'Failed to initiate Google login');
+  }
+};
+
+/**
+ * Handle Google OAuth callback
+ */
+exports.googleCallback = async (req, res, next) => {
+  try {
+    passport.authenticate('google', async (err, user, info) => {
+      if (err) {
+        logger.error(`Google OAuth error: ${err.message}`);
+        return errorResponse(res, 500, 'Authentication failed');
+      }
+
+      if (!user) {
+        logger.error('Google OAuth: No user returned');
+        return errorResponse(res, 401, 'Authentication failed');
+      }
+
+      try {
+        const result = await oauthService.handleOAuthCallback(user);
+
+        // Redirect to frontend with token or return JSON response
+        if (req.session.returnUrl) {
+          const returnUrl = req.session.returnUrl;
+          delete req.session.returnUrl;
+          return res.redirect(`${returnUrl}?token=${result.token}&success=true`);
+        }
+
+        successResponse(res, 200, 'Login successful', result);
+      } catch (serviceError) {
+        logger.error(`OAuth callback service error: ${serviceError.message}`);
+        errorResponse(res, 500, 'Failed to complete authentication');
+      }
+    })(req, res, next);
+  } catch (error) {
+    logger.error(`Google callback error: ${error.message}`);
+    errorResponse(res, 500, 'Authentication failed');
+  }
+};
+
+/**
+ * Get current user info (for checking auth status)
+ */
+exports.getCurrentUser = (req, res) => {
+  try {
+    if (req.user) {
+      successResponse(res, 200, 'User authenticated', {
+        user: req.user,
+      });
+    } else {
+      errorResponse(res, 401, 'Not authenticated');
+    }
+  } catch (error) {
+    logger.error(`Get current user error: ${error.message}`);
+    errorResponse(res, 500, 'Failed to get user info');
+  }
+};
+
+/**
+ * Logout user
+ */
+exports.logout = (req, res) => {
+  try {
+    req.logout((err) => {
+      if (err) {
+        logger.error(`Logout error: ${err.message}`);
+        return errorResponse(res, 500, 'Logout failed');
+      }
+
+      req.session.destroy((err) => {
+        if (err) {
+          logger.error(`Session destroy error: ${err.message}`);
+          return errorResponse(res, 500, 'Logout failed');
+        }
+
+        res.clearCookie('connect.sid');
+        successResponse(res, 200, 'Logout successful');
+      });
+    });
+  } catch (error) {
+    logger.error(`Logout error: ${error.message}`);
+    errorResponse(res, 500, 'Logout failed');
+  }
+};
+
+/**
+ * Check if user is authenticated
+ */
+exports.checkAuth = (req, res) => {
+  try {
+    if (req.user) {
+      successResponse(res, 200, 'Authenticated', {
+        authenticated: true,
+        user: req.user,
+      });
+    } else {
+      successResponse(res, 200, 'Not authenticated', {
+        authenticated: false,
+      });
+    }
+  } catch (error) {
+    logger.error(`Check auth error: ${error.message}`);
+    errorResponse(res, 500, 'Failed to check authentication status');
+  }
+};

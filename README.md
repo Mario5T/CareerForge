@@ -8,8 +8,9 @@ The platform also includes a **blog section** for tech updates and career tips, 
 ---
 
 ## 🚀 Key Features / Modules
-- **User Authentication & Authorization** (JWT-based)
+- **User Authentication & Authorization** (JWT-based + Google OAuth)
 - **Three User Roles**: User, Employer, and Company
+- **OAuth Integration**: Login/Signup with Google
 - **Job Posting & Application System**
 - **Smart Job Search** with filters and recommendations
 - **Resume Builder** with customizable templates
@@ -34,8 +35,10 @@ The platform also includes a **blog section** for tech updates and career tips, 
 
 ## 🖥️ Page / Screen List (Frontend)
 ### 🔐 Authentication
-- Login / Register Page  
-- Password Reset Page  
+- Login / Register Page (Email/Password)
+- **Google OAuth Login/Signup**
+- Password Reset Page
+- Session Management & JWT Tokens
 
 ### 👤 User Section
 - Dashboard (applied jobs, recommendations)
@@ -64,21 +67,24 @@ The platform also includes a **blog section** for tech updates and career tips, 
 ---
 
 ## 🗄️ Database Schema (Rough Draft)
-**Collections (MongoDB):**
-- **users** → `{ _id, name, email, password, role, resume, profileInfo }`
-- **jobs** → `{ _id, title, description, companyId, employerId, applicants: [userId], status }`
-- **companies** → `{ _id, name, verified, employers: [employerId], about }`
-- **applications** → `{ _id, jobId, userId, resumeUrl, status }`
-- **blogs** → `{ _id, title, content, authorId, tags, createdAt }`
-- **notifications** → `{ _id, userId, message, isRead }`
+**Tables (PostgreSQL with Prisma):**
+- **users** → `{ id, name, email, password?, googleId?, provider?, avatar?, role, resume, profileInfo }`
+- **jobs** → `{ id, title, description, companyId, employerId, applicants: [userId], status }`
+- **companies** → `{ id, name, verified, employers: [employerId], about }`
+- **applications** → `{ id, jobId, userId, resumeUrl, status }`
+- **blogs** → `{ id, title, content, authorId, tags, createdAt }`
+- **notifications** → `{ id, userId, message, isRead }`
+
+**Note:** The User model now supports OAuth authentication with optional password field for OAuth users.
 
 ---
 
 ## 🧰 Tech Stack (Tentative)
 **Frontend:** React.js, React Router, Tailwind CSS / Material UI  
-**Backend:** Node.js, Express.js  
-**Database:** MongoDB (Mongoose ODM)  
-**Authentication:** JWT, bcrypt, cookies  
+**Backend:** Node.js, Express.js, Passport.js  
+**Database:** PostgreSQL (Prisma ORM)  
+**Authentication:** JWT, bcrypt, Passport.js, Google OAuth 2.0  
+**Session Management:** Express Session  
 **Optional Tools:**  
 - Nodemailer (email notifications)  
 - Cloudinary (for resume & image uploads)  
