@@ -3,12 +3,8 @@ const oauthService = require('../services/oauth.service');
 const { successResponse, errorResponse } = require('../utils/response');
 const logger = require('../utils/logger');
 
-/**
- * Initiate Google OAuth login
- */
 exports.googleLogin = (req, res, next) => {
   try {
-    // Store the return URL if provided
     if (req.query.returnUrl) {
       req.session.returnUrl = req.query.returnUrl;
     }
@@ -22,9 +18,6 @@ exports.googleLogin = (req, res, next) => {
   }
 };
 
-/**
- * Handle Google OAuth callback
- */
 exports.googleCallback = async (req, res, next) => {
   try {
     passport.authenticate('google', async (err, user, info) => {
@@ -40,8 +33,6 @@ exports.googleCallback = async (req, res, next) => {
 
       try {
         const result = await oauthService.handleOAuthCallback(user);
-
-        // Redirect to frontend with token or return JSON response
         if (req.session.returnUrl) {
           const returnUrl = req.session.returnUrl;
           delete req.session.returnUrl;
@@ -60,9 +51,6 @@ exports.googleCallback = async (req, res, next) => {
   }
 };
 
-/**
- * Get current user info (for checking auth status)
- */
 exports.getCurrentUser = (req, res) => {
   try {
     if (req.user) {
@@ -78,9 +66,7 @@ exports.getCurrentUser = (req, res) => {
   }
 };
 
-/**
- * Logout user
- */
+
 exports.logout = (req, res) => {
   try {
     req.logout((err) => {
@@ -105,9 +91,6 @@ exports.logout = (req, res) => {
   }
 };
 
-/**
- * Check if user is authenticated
- */
 exports.checkAuth = (req, res) => {
   try {
     if (req.user) {

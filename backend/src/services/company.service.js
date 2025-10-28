@@ -1,11 +1,8 @@
 const { prisma } = require('../config/db');
 const { AppError } = require('../utils/errorHandler');
-
-// Create company
 exports.createCompany = async (companyData) => {
   const { name, description, website, location, logo, industry, companySize } = companyData;
 
-  // Check if company name already exists
   const existingCompany = await prisma.company.findUnique({
     where: { name },
   });
@@ -29,7 +26,6 @@ exports.createCompany = async (companyData) => {
   return company;
 };
 
-// Get all companies
 exports.getAllCompanies = async (filters = {}) => {
   const { search, industry, companySize, page = 1, limit = 10 } = filters;
 
@@ -91,7 +87,6 @@ exports.getAllCompanies = async (filters = {}) => {
   };
 };
 
-// Get company by ID
 exports.getCompanyById = async (companyId) => {
   const company = await prisma.company.findUnique({
     where: { id: companyId },
@@ -141,9 +136,7 @@ exports.getCompanyById = async (companyId) => {
   return company;
 };
 
-// Update company
 exports.updateCompany = async (companyId, updateData, userId) => {
-  // Check if user is an employer of this company
   const employer = await prisma.employer.findUnique({
     where: {
       userId_companyId: {
@@ -178,9 +171,7 @@ exports.updateCompany = async (companyId, updateData, userId) => {
   return updatedCompany;
 };
 
-// Delete company
 exports.deleteCompany = async (companyId, userId) => {
-  // Check if user is an employer of this company
   const employer = await prisma.employer.findUnique({
     where: {
       userId_companyId: {
@@ -207,9 +198,7 @@ exports.deleteCompany = async (companyId, userId) => {
   });
 };
 
-// Add new functions for employer management
 exports.addEmployerToCompany = async (companyId, userId, employerData) => {
-  // Check if company exists
   const company = await prisma.company.findUnique({
     where: { id: companyId },
   });
@@ -218,7 +207,6 @@ exports.addEmployerToCompany = async (companyId, userId, employerData) => {
     throw new AppError('Company not found', 404);
   }
 
-  // Check if user already exists as employer for this company
   const existingEmployer = await prisma.employer.findUnique({
     where: {
       userId_companyId: {
@@ -259,7 +247,6 @@ exports.addEmployerToCompany = async (companyId, userId, employerData) => {
 };
 
 exports.removeEmployerFromCompany = async (companyId, userId) => {
-  // Check if user is an employer of this company
   const employer = await prisma.employer.findUnique({
     where: {
       userId_companyId: {

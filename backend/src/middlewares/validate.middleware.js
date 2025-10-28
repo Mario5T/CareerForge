@@ -1,16 +1,7 @@
 const { validationResult } = require('express-validator');
 const { errorResponse } = require('../utils/response');
 
-/**
- * Validate request using express-validator
- *
- * Usage:
- * - As factory: `validate(rulesArray)` where `rulesArray` is an array of validators
- *   e.g. router.post('/', validate(companyValidation.create), controller)
- * - Backwards-compatible: `validate` can also be used as middleware directly
- */
 exports.validate = (rules) => {
-  // If called as validate(rulesArray), return an array of middleware: the rules followed by the result checker
   if (Array.isArray(rules)) {
     return [
       ...rules,
@@ -31,7 +22,6 @@ exports.validate = (rules) => {
     ];
   }
 
-  // If used directly as middleware (no rules passed), behave like before
   return (req, res, next) => {
     const errors = validationResult(req);
 

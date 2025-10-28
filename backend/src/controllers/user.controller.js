@@ -1,8 +1,6 @@
 const userService = require('../services/user.service');
 const { successResponse, errorResponse } = require('../utils/response');
 const logger = require('../utils/logger');
-
-// Register user
 exports.register = async (req, res) => {
   try {
     const result = await userService.createUser(req.body);
@@ -12,8 +10,6 @@ exports.register = async (req, res) => {
     errorResponse(res, error.statusCode || 500, error.message);
   }
 };
-
-// Login user
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -25,7 +21,6 @@ exports.login = async (req, res) => {
   }
 };
 
-// Get user profile
 exports.getProfile = async (req, res) => {
   try {
     const user = await userService.getUserById(req.user.id);
@@ -36,7 +31,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// Update user profile
 exports.updateProfile = async (req, res) => {
   try {
     const user = await userService.updateUser(req.user.id, req.body);
@@ -47,7 +41,6 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// Delete user
 exports.deleteUser = async (req, res) => {
   try {
     await userService.deleteUser(req.params.id);

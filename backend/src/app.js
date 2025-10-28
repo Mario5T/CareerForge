@@ -7,8 +7,6 @@ const passport = require('./config/passport');
 const { errorHandler } = require('./utils/errorHandler');
 const { CORS_ORIGIN, SESSION_SECRET } = require('./config/env');
 const logger = require('./utils/logger');
-
-// Import routes
 const userRoutes = require('./routes/user.routes');
 const companyRoutes = require('./routes/company.routes');
 const employerRoutes = require('./routes/employer.routes');
@@ -16,39 +14,55 @@ const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 
-// Security middleware
 app.use(helmet());
 
-// CORS
-app.use(
-  cors({
-    origin: CORS_ORIGIN,
-    credentials: true,
-  })
-);
+const { NODE_ENV } = require('./config/env');
 
-// Session middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://192.168.128.122:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000'
+];
+
+const corsOptions = {
+  credentials: true,
+};
+
+if (NODE_ENV === 'production') {
+  corsOptions.origin = function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  };
+} else {
+  corsOptions.origin = true;
+}
+
+app.use(cors(corsOptions));
+
+
 app.use(
   session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      secure: process.env.NODE_ENV === 'production', 
+      maxAge: 24 * 60 * 60 * 1000, 
     },
   })
 );
 
-// Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Logging middleware
 app.use(
   morgan('combined', {
     stream: {
@@ -57,8 +71,7 @@ app.use(
   })
 );
 
-// Health check route
-app.get('/health', (req, res) => {
+app.get('/api/v1/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Server is running',
@@ -66,13 +79,11 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/employer', employerRoutes);
 app.use('/api/auth', authRoutes);
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -80,7 +91,6 @@ app.use((req, res) => {
   });
 });
 
-// Error handler middleware (must be last)
 app.use(errorHandler);
 
 module.exports = app;

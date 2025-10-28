@@ -14,7 +14,6 @@ exports.createCompany = async (req, res) => {
   }
 };
 
-// Get all companies
 exports.getAllCompanies = async (req, res) => {
   try {
     const companies = await companyService.getAllCompanies(req.query);
@@ -24,8 +23,6 @@ exports.getAllCompanies = async (req, res) => {
     errorResponse(res, error.statusCode || 500, error.message);
   }
 };
-
-// Get company by ID
 exports.getCompanyById = async (req, res) => {
   try {
     const company = await companyService.getCompanyById(req.params.id);
@@ -62,7 +59,6 @@ exports.deleteCompany = async (req, res) => {
   }
 };
 
-// Add employer to company
 exports.addEmployer = async (req, res) => {
   try {
     const employer = await companyService.addEmployerToCompany(
@@ -77,7 +73,6 @@ exports.addEmployer = async (req, res) => {
   }
 };
 
-// Remove employer from company
 exports.removeEmployer = async (req, res) => {
   try {
     await companyService.removeEmployerFromCompany(req.params.id, req.body.userId);
@@ -87,8 +82,6 @@ exports.removeEmployer = async (req, res) => {
     errorResponse(res, error.statusCode || 500, error.message);
   }
 };
-
-// Get company employers
 exports.getCompanyEmployers = async (req, res) => {
   try {
     const employers = await companyService.getCompanyEmployers(req.params.id);

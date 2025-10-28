@@ -3,19 +3,14 @@ const { prisma } = require('../config/db');
 const { JWT_SECRET } = require('../config/env');
 const { AppError } = require('../utils/errorHandler');
 
-/**
- * Protect routes - Verify JWT token or OAuth session
- */
 exports.protect = async (req, res, next) => {
   try {
     let token;
     let user;
 
-    // Check if user is authenticated via OAuth session
     if (req.user) {
       user = req.user;
     } else {
-      // Get token from header
       if (
         req.headers.authorization &&
         req.headers.authorization.startsWith('Bearer')
@@ -28,10 +23,7 @@ exports.protect = async (req, res, next) => {
       }
 
       try {
-        // Verify token
         const decoded = jwt.verify(token, JWT_SECRET);
-
-        // Get user from token
         user = await prisma.user.findUnique({
           where: { id: decoded.id },
           select: {
