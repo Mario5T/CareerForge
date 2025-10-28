@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from '../../components/ui/badge';
 import { Search, MapPin, Briefcase, Clock, DollarSign, Building2, ArrowRight } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
+import jobService from '../../services/job.service';
 
 const Jobs = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,70 +21,27 @@ const Jobs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 10;
   const { toast } = useToast();
-  const mockJobs = [
-    {
-      id: 1,
-      title: 'Senior Frontend Developer',
-      company: 'TechCorp Inc.',
-      location: 'San Francisco, CA',
-      type: 'Full-time',
-      salary: '$120,000 - $150,000',
-      posted: '2 days ago',
-      description: 'We are looking for an experienced Frontend Developer to join our team...',
-      skills: ['React', 'TypeScript', 'Redux', 'GraphQL'],
-    },
-    {
-      id: 2,
-      title: 'UX/UI Designer',
-      company: 'DesignHub',
-      location: 'Remote',
-      type: 'Contract',
-      salary: '$80 - $100/hr',
-      posted: '1 week ago',
-      description: 'Join our design team to create beautiful and intuitive user experiences...',
-      skills: ['Figma', 'Sketch', 'UI/UX', 'Prototyping'],
-    },
-    {
-      id: 3,
-      title: 'Backend Engineer',
-      company: 'DataSystems',
-      location: 'New York, NY',
-      type: 'Full-time',
-      salary: '$130,000 - $160,000',
-      posted: '3 days ago',
-      description: 'Looking for a Backend Engineer to develop and maintain our server infrastructure...',
-      skills: ['Node.js', 'Python', 'AWS', 'Docker'],
-    },
-  ];
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-      
-        setTimeout(() => {
-          const filteredJobs = mockJobs.filter(job => {
-            const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                               job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                               job.description.toLowerCase().includes(searchTerm.toLowerCase());
-            
-            const matchesLocation = !filters.location || 
-                                 job.location.toLowerCase().includes(filters.location.toLowerCase());
-            
-            const matchesType = !filters.jobType || 
-                             job.type.toLowerCase() === filters.jobType.toLowerCase();
-            
-            return matchesSearch && matchesLocation && matchesType;
-          });
-          
-          setJobs(filteredJobs);
-          setLoading(false);
-        }, 500);
+        
+        // Build query params for backend filtering
+        const params = {};
+        if (searchTerm) params.search = searchTerm;
+        if (filters.location) params.location = filters.location;
+        if (filters.jobType) params.jobType = filters.jobType;
+        if (filters.experience) params.experienceLevel = filters.experience;
+        
+        const response = await jobService.getAllJobs(params);
+        setJobs(response.data || []);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching jobs:', error);
         toast({
           title: 'Error',
-          description: 'Failed to load jobs. Please try again later.',
+          description: error.response?.data?.error || error.message || 'Failed to load jobs. Please try again later.',
           variant: 'destructive',
         });
         setLoading(false);
@@ -91,7 +49,8 @@ const Jobs = () => {
     };
 
     fetchJobs();
-  }, [searchTerm, filters, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, filters.location, filters.jobType, filters.experience]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -171,11 +130,11 @@ const Jobs = () => {
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="">All Job Types</option>
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Contract">Contract</option>
-                <option value="Internship">Internship</option>
-                <option value="Remote">Remote</option>
+                <option value="FULL_TIME">Full-time</option>
+                <option value="PART_TIME">Part-time</option>
+                <option value="CONTRACT">Contract</option>
+                <option value="INTERNSHIP">Internship</option>
+                <option value="REMOTE">Remote</option>
               </select>
               <select
                 name="experience"
@@ -184,10 +143,10 @@ const Jobs = () => {
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="">All Experience Levels</option>
-                <option value="Entry Level">Entry Level</option>
-                <option value="Mid Level">Mid Level</option>
-                <option value="Senior Level">Senior Level</option>
-                <option value="Lead">Lead</option>
+                <option value="ENTRY">Entry Level</option>
+                <option value="MID">Mid Level</option>
+                <option value="SENIOR">Senior Level</option>
+                <option value="LEAD">Lead</option>
               </select>
             </div>
           </form>
@@ -211,7 +170,7 @@ const Jobs = () => {
                           {job.title}
                         </Link>
                       </h3>
-                      <p className="text-muted-foreground">{job.company}</p>
+                      <p className="text-muted-foreground">{job.company?.name || 'Company'}</p>
                       <div className="flex flex-wrap gap-2 mt-2">
                         <Badge variant="secondary" className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
@@ -219,24 +178,36 @@ const Jobs = () => {
                         </Badge>
                         <Badge variant="outline" className="flex items-center gap-1">
                           <Briefcase className="h-3 w-3" />
-                          {job.type}
+                          {job.jobType?.replace('_', ' ')}
                         </Badge>
-                        <Badge variant="outline" className="flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" />
-                          {job.salary}
-                        </Badge>
+                        {(job.salaryMin || job.salaryMax) && (
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <DollarSign className="h-3 w-3" />
+                            {job.salaryMin && job.salaryMax 
+                              ? `${job.salaryCurrency} ${job.salaryMin.toLocaleString()} - ${job.salaryMax.toLocaleString()}`
+                              : job.salaryMin 
+                              ? `${job.salaryCurrency} ${job.salaryMin.toLocaleString()}+`
+                              : `${job.salaryCurrency} ${job.salaryMax.toLocaleString()}`
+                            }
+                          </Badge>
+                        )}
                         <Badge variant="outline" className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {job.posted}
+                          {new Date(job.createdAt).toLocaleDateString()}
                         </Badge>
                       </div>
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {job.skills.map((skill, index) => (
-                          <Badge key={index} variant="secondary">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
+                      {job.requirements && job.requirements.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {job.requirements.slice(0, 5).map((req, index) => (
+                            <Badge key={index} variant="secondary">
+                              {req}
+                            </Badge>
+                          ))}
+                          {job.requirements.length > 5 && (
+                            <Badge variant="secondary">+{job.requirements.length - 5} more</Badge>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex-shrink-0">

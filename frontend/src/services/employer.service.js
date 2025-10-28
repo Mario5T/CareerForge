@@ -3,7 +3,7 @@ import api from './api';
 export const employerService = {
   createCompanyProfile: async (companyData) => {
     try {
-      const response = await api.post('/employers/company', companyData);
+      const response = await api.post('/employer/company', companyData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -11,7 +11,7 @@ export const employerService = {
   },
   updateCompanyProfile: async (companyData) => {
     try {
-      const response = await api.put('/employers/company', companyData);
+      const response = await api.put('/employer/company', companyData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -19,7 +19,7 @@ export const employerService = {
   },
   getMyCompany: async () => {
     try {
-      const response = await api.get('/employers/company');
+      const response = await api.get('/employer/company');
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -28,7 +28,7 @@ export const employerService = {
 
   createJob: async (jobData) => {
     try {
-      const response = await api.post('/employers/jobs', jobData);
+      const response = await api.post('/employer/jobs', jobData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -37,7 +37,7 @@ export const employerService = {
 
   getMyJobs: async () => {
     try {
-      const response = await api.get('/employers/jobs');
+      const response = await api.get('/employer/jobs');
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -46,7 +46,7 @@ export const employerService = {
 
   getCompanyJobs: async () => {
     try {
-      const response = await api.get('/employers/jobs/company');
+      const response = await api.get('/employer/jobs/company');
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -55,7 +55,7 @@ export const employerService = {
 
   updateJob: async (jobId, jobData) => {
     try {
-      const response = await api.put(`/employers/jobs/${jobId}`, jobData);
+      const response = await api.put(`/employer/jobs/${jobId}`, jobData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -64,7 +64,7 @@ export const employerService = {
 
   deleteJob: async (jobId) => {
     try {
-      const response = await api.delete(`/employers/jobs/${jobId}`);
+      const response = await api.delete(`/employer/jobs/${jobId}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -72,7 +72,7 @@ export const employerService = {
   },
   getApplicantsForJob: async (jobId) => {
     try {
-      const response = await api.get(`/employers/jobs/${jobId}/applicants`);
+      const response = await api.get(`/employer/jobs/${jobId}/applicants`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

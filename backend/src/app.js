@@ -10,6 +10,7 @@ const logger = require('./utils/logger');
 const userRoutes = require('./routes/user.routes');
 const companyRoutes = require('./routes/company.routes');
 const employerRoutes = require('./routes/employer.routes');
+const jobRoutes = require('./routes/job.routes');
 const authRoutes = require('./routes/auth.routes');
 
 const app = express();
@@ -82,6 +83,7 @@ app.get('/api/v1/health', (req, res) => {
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/employer', employerRoutes);
+app.use('/api/v1/jobs', jobRoutes);
 app.use('/api/auth', authRoutes);
 
 app.use((req, res) => {

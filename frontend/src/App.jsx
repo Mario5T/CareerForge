@@ -13,14 +13,14 @@ import AuthLayout from './layouts/AuthLayout';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-// Temporarily comment out components causing errors
-// import Dashboard from './pages/dashboard/Dashboard';
-// import Profile from './pages/profile/Profile';
-// import Jobs from './pages/jobs/Jobs';
-// import JobDetails from './pages/jobs/JobDetails';
-// import Companies from './pages/companies/Companies';
-// import CompanyDetails from './pages/companies/CompanyDetails';
+import Dashboard from './pages/dashboard/Dashboard';
+import Profile from './pages/profile/Profile';
+import Jobs from './pages/jobs/Jobs';
+import JobDetails from './pages/jobs/JobDetails';
+import Companies from './pages/companies/Companies';
 import NotFound from './pages/NotFound';
+import PostJob from './pages/employer/PostJob';
+import ManageJobs from './pages/employer/ManageJobs';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -46,49 +46,60 @@ const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
-      // Temporarily comment out job routes
-      // {
-      //   path: 'jobs',
-      //   children: [
-      //     {
-      //       index: true,
-      //       element: <Jobs />,
-      //     },
-      //     {
-      //       path: ':id',
-      //       element: <JobDetails />,
-      //     },
-      //   ],
-      // },
-      // {
-      //   path: 'companies',
-      //   children: [
-      //     {
-      //       index: true,
-      //       element: <Companies />,
-      //     },
-      //     {
-      //       path: ':id',
-      //       element: <CompanyDetails />,
-      //     },
-      //   ],
-      // },
-      // {
-      //   path: 'profile',
-      //   element: (
-      //     <ProtectedRoute>
-      //       <Profile />
-      //     </ProtectedRoute>
-      //   ),
-      // },
-      // {
-      //   path: 'dashboard',
-      //   element: (
-      //     <ProtectedRoute>
-      //       <Dashboard />
-      //     </ProtectedRoute>
-      //   ),
-      // },
+      {
+        path: 'jobs',
+        children: [
+          {
+            index: true,
+            element: <Jobs />,
+          },
+          {
+            path: ':id',
+            element: <JobDetails />,
+          },
+        ],
+      },
+      {
+        path: 'companies',
+        element: <Companies />,
+      },
+      {
+        path: 'profile',
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard',
+        element: (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'employer',
+        children: [
+          {
+            path: 'jobs',
+            element: (
+              <ProtectedRoute>
+                <ManageJobs />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'post-job',
+            element: (
+              <ProtectedRoute>
+                <PostJob />
+              </ProtectedRoute>
+            ),
+          },
+        ],
+      },
     ],
   },
   {
