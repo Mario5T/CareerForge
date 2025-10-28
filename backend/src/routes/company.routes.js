@@ -8,7 +8,7 @@ const { companyValidation } = require('../middlewares/validate.middleware');
 router.get('/', companyController.getAllCompanies);
 router.get('/:id', companyController.getCompanyById);
 router.use(protect);
-router.use(authorize('RECRUITER', 'ADMIN'));
+// router.use(authorize('RECRUITER', 'ADMIN'));
 
 router.post('/', validate(companyValidation.create), companyController.createCompany);
 router.put('/:id', validate(companyValidation.update), companyController.updateCompany);

@@ -1,52 +1,65 @@
 const userService = require('../services/user.service');
 const { successResponse, errorResponse } = require('../utils/response');
 const logger = require('../utils/logger');
-exports.register = async (req, res) => {
-  try {
-    const result = await userService.createUser(req.body);
-    successResponse(res, 201, 'User registered successfully', result);
-  } catch (error) {
-    logger.error(`Register error: ${error.message}`);
-    errorResponse(res, error.statusCode || 500, error.message);
-  }
-};
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const result = await userService.loginUser(email, password);
-    successResponse(res, 200, 'Login successful', result);
-  } catch (error) {
-    logger.error(`Login error: ${error.message}`);
-    errorResponse(res, error.statusCode || 401, error.message);
+
+const bcrypt=require('bcryptjs');
+const jwt=require('jsonwebtoken');
+const {prisma}=require('../config/db');
+const {JWT_SECRET,JWT_EXPIRE}=require('../config/env');
+
+exports.registerUser=async(req,res)=>{
+  try{
+    const {name,email,password}=req.body;
+    const existingUser=await prisma.user.findUnique({where:{email}});
+    if(existingUser) return res.status(400).json({message:"User already exists"});
+
+    const hashedPassword=await bcrypt.hash(password,10);
+    const user=await prisma.user.create({
+      data:{name,email,password:hashedPassword}
+    });
+
+    res.status(201).json({message:"User registered successfully",user});
+  }catch(err){
+    console.error(err);
+    res.status(500).json({message:"Server error"});
   }
 };
 
-exports.getProfile = async (req, res) => {
-  try {
-    const user = await userService.getUserById(req.user.id);
-    successResponse(res, 200, 'Profile retrieved successfully', user);
-  } catch (error) {
-    logger.error(`Get profile error: ${error.message}`);
-    errorResponse(res, error.statusCode || 500, error.message);
+exports.loginUser=async(req,res)=>{
+  try{
+    const {email,password}=req.body;
+    const user=await prisma.user.findUnique({where:{email}});
+    if(!user) return res.status(400).json({message:"Invalid credentials"});
+
+    const isMatch=await bcrypt.compare(password,user.password);
+    if(!isMatch) return res.status(400).json({message:"Invalid credentials"});
+
+    const token=jwt.sign({id:user.id,role:user.role},JWT_SECRET,{expiresIn:JWT_EXPIRE});
+    res.json({token,user});
+  }catch(err){
+    console.error(err);
+    res.status(500).json({message:"Server error"});
   }
 };
 
-exports.updateProfile = async (req, res) => {
-  try {
-    const user = await userService.updateUser(req.user.id, req.body);
-    successResponse(res, 200, 'Profile updated successfully', user);
-  } catch (error) {
-    logger.error(`Update profile error: ${error.message}`);
-    errorResponse(res, error.statusCode || 500, error.message);
+exports.getProfile=async(req,res)=>{
+  try{
+    const user=await prisma.user.findUnique({where:{id:req.user.id}});
+    res.json(user);
+  }catch(err){
+    res.status(500).json({message:"Server error"});
   }
 };
 
-exports.deleteUser = async (req, res) => {
-  try {
-    await userService.deleteUser(req.params.id);
-    successResponse(res, 200, 'User deleted successfully');
-  } catch (error) {
-    logger.error(`Delete user error: ${error.message}`);
-    errorResponse(res, error.statusCode || 500, error.message);
+exports.updateProfile=async(req,res)=>{
+  try{
+    const data=req.body;
+    const updated=await prisma.user.update({
+      where:{id:req.user.id},
+      data
+    });
+    res.json({message:"Profile updated",user:updated});
+  }catch(err){
+    res.status(500).json({message:"Server error"});
   }
 };
