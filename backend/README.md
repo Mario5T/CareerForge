@@ -108,7 +108,11 @@ The application uses the following main models:
 - **Job**: Job postings
 - **Application**: Job applications
 
-See `prisma/schema.prisma` for the complete schema definition.
+See [`prisma/schema.prisma`](./prisma/schema.prisma) for the complete schema definition.
+
+Below is the visual ER model representing all entities and relationships:
+
+![Database Schema](./assets/database-schema.svg)
 
 ## Prisma Commands
 
