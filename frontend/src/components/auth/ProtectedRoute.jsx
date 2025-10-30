@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
-export const ProtectedRoute = ({ children, requireAuth = true, redirectTo = '/login' }) => {
+export const ProtectedRoute = ({ children, requireAuth = true, redirectTo = '/auth/login' }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
