@@ -1,7 +1,157 @@
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle } from 'lucide-react';
+import { selectCurrentUser } from '../store/slices/auth/authSlice';
 
 const Home = () => {
+  const user = useSelector(selectCurrentUser);
+
+  // Company Dashboard View
+  if (user?.role === 'COMPANY') {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Company Dashboard</h1>
+          <p className="text-gray-600 mt-2">Welcome back! Here's an overview of your company</p>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">Jobs currently open</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">Pending review</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Recruiters</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">Team members</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Profile Status</CardTitle>
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0%</div>
+              <p className="text-xs text-muted-foreground">Profile complete</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Get started with these essential tasks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Button asChild className="h-auto py-4 flex flex-col items-center gap-2">
+                <Link to="/company/profile">
+                  <Building2 className="h-6 w-6" />
+                  <span>Complete Company Profile</span>
+                </Link>
+              </Button>
+              
+              <Button asChild variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                <Link to="/company/jobs">
+                  <Briefcase className="h-6 w-6" />
+                  <span>Post a Job</span>
+                </Link>
+              </Button>
+              
+              <Button asChild variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                <Link to="/company/recruiters">
+                  <Users className="h-6 w-6" />
+                  <span>Manage Recruiters</span>
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Setup Checklist */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Setup Checklist</CardTitle>
+            <CardDescription>Complete these steps to get the most out of CareerForge</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-gray-400" />
+                <div className="flex-1">
+                  <p className="font-medium">Create your account</p>
+                  <p className="text-sm text-gray-600">You're all set!</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-orange-500" />
+                <div className="flex-1">
+                  <p className="font-medium">Complete company profile</p>
+                  <p className="text-sm text-gray-600">Add your company details and logo</p>
+                </div>
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/company/profile">Complete</Link>
+                </Button>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-orange-500" />
+                <div className="flex-1">
+                  <p className="font-medium">Post your first job</p>
+                  <p className="text-sm text-gray-600">Start attracting top talent</p>
+                </div>
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/company/jobs">Post Job</Link>
+                </Button>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-orange-500" />
+                <div className="flex-1">
+                  <p className="font-medium">Invite recruiters</p>
+                  <p className="text-sm text-gray-600">Add team members to help with hiring</p>
+                </div>
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/company/recruiters">Invite</Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Regular Home Page for non-company users
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center">

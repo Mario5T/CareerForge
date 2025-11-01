@@ -1,0 +1,12 @@
+{
+  "watch": ["src"],
+  "ext": "js,json",
+  "ignore": ["src/**/*.test.js", "node_modules"],
+  "exec": "node src/server.js",
+  "restartable": "rs",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "signal": "SIGTERM",
+  "delay": 1000
+}

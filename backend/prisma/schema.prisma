@@ -35,6 +35,7 @@ model User {
   employers     Employer[]
   jobsCreated   Job[]        @relation("JobCreator")
   applications  Application[]
+  ownedCompanies Company[]    @relation("CompanyOwner")
 
   @@index([email])
   @@index([googleId])
@@ -54,10 +55,13 @@ model Company {
   updatedAt   DateTime @updatedAt
 
   // Relations
+  ownerId       String?
+  owner         User?      @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   employers     Employer[]
   jobs          Job[]
 
   @@index([name])
+  @@index([ownerId])
 }
 
 model Employer {
@@ -135,6 +139,7 @@ model Application {
 enum Role {
   USER
   RECRUITER
+  COMPANY
   ADMIN
 }
 

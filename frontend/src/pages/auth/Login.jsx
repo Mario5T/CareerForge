@@ -110,7 +110,7 @@ const Login = () => {
         variant="outline"
         type="button"
         className="w-full"
-        onClick={() => window.location.href = '/api/auth/google'}
+        onClick={() => window.location.href = 'http://localhost:5001/api/v1/auth/google'}
       >
         <svg
           className="mr-2 h-4 w-4"

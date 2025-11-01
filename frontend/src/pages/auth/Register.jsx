@@ -13,14 +13,14 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    userType: 'candidate',
+    role: 'USER',
   });
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { name, email, password, confirmPassword, userType } = formData;
+  const { name, email, password, confirmPassword, role } = formData;
 
   const handleChange = (e) => {
     setFormData({
@@ -44,7 +44,7 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      await dispatch(register({ name, email, password, userType })).unwrap();
+      await dispatch(register({ name, email, password, role })).unwrap();
       toast({
         title: 'Success',
         description: 'Registration successful! Welcome to CareerForge.',
@@ -121,30 +121,59 @@ const Register = () => {
             minLength={6}
           />
         </div>
-        <div className="space-y-2">
-          <Label>I am a</Label>
-          <div className="flex gap-4">
-            <label className="flex items-center space-x-2">
+        <div className="space-y-3">
+          <Label>Account Type</Label>
+          <div className="grid grid-cols-3 gap-3">
+            <label className={`flex flex-col items-center space-y-2 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+              role === 'USER' ? 'border-[#6A38C2] bg-purple-50' : 'border-gray-200 hover:border-gray-300'
+            }`}>
               <input
                 type="radio"
-                name="userType"
-                value="candidate"
-                checked={userType === 'candidate'}
+                name="role"
+                value="USER"
+                checked={role === 'USER'}
                 onChange={handleChange}
-                className="h-4 w-4 text-primary"
+                className="sr-only"
               />
-              <span>Job Seeker</span>
+              <svg className="w-8 h-8 text-[#6A38C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span className="font-semibold text-sm">Job Seeker</span>
+              <span className="text-xs text-gray-500 text-center">Find & apply to jobs</span>
             </label>
-            <label className="flex items-center space-x-2">
+            <label className={`flex flex-col items-center space-y-2 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+              role === 'RECRUITER' ? 'border-[#6A38C2] bg-purple-50' : 'border-gray-200 hover:border-gray-300'
+            }`}>
               <input
                 type="radio"
-                name="userType"
-                value="employer"
-                checked={userType === 'employer'}
+                name="role"
+                value="RECRUITER"
+                checked={role === 'RECRUITER'}
                 onChange={handleChange}
-                className="h-4 w-4 text-primary"
+                className="sr-only"
               />
-              <span>Employer</span>
+              <svg className="w-8 h-8 text-[#6A38C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span className="font-semibold text-sm">Recruiter</span>
+              <span className="text-xs text-gray-500 text-center">Post jobs for hire</span>
+            </label>
+            <label className={`flex flex-col items-center space-y-2 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+              role === 'COMPANY' ? 'border-[#6A38C2] bg-purple-50' : 'border-gray-200 hover:border-gray-300'
+            }`}>
+              <input
+                type="radio"
+                name="role"
+                value="COMPANY"
+                checked={role === 'COMPANY'}
+                onChange={handleChange}
+                className="sr-only"
+              />
+              <svg className="w-8 h-8 text-[#6A38C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span className="font-semibold text-sm">Company</span>
+              <span className="text-xs text-gray-500 text-center">Manage recruiters</span>
             </label>
           </div>
         </div>
@@ -166,7 +195,7 @@ const Register = () => {
         variant="outline"
         type="button"
         className="w-full"
-        onClick={() => window.location.href = '/api/auth/google'}
+        onClick={() => window.location.href = 'http://localhost:5001/api/v1/auth/google'}
       >
         <svg
           className="mr-2 h-4 w-4"

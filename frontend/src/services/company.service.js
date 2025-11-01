@@ -67,6 +67,34 @@ export const companyService = {
       throw error.response?.data || error.message;
     }
   },
+
+  // COMPANY role: Manage own company
+  getMyCompany: async () => {
+    try {
+      const response = await api.get('/companies/my-company/profile');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  createMyCompany: async (companyData) => {
+    try {
+      const response = await api.post('/companies/my-company/profile', companyData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  updateMyCompany: async (companyData) => {
+    try {
+      const response = await api.put('/companies/my-company/profile', companyData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
 };
 
 export default companyService;

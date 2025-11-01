@@ -1,7 +1,16 @@
 const { prisma } = require('../config/db');
 const { AppError } = require('../utils/errorHandler');
-exports.createCompany = async (companyData) => {
+exports.createCompany = async (companyData, ownerId) => {
   const { name, description, website, location, logo, industry, companySize } = companyData;
+
+  // Check if owner already has a company
+  const existingOwned = await prisma.company.findFirst({
+    where: { ownerId },
+  });
+
+  if (existingOwned) {
+    throw new AppError('You already own a company. Each user can own only one company.', 400);
+  }
 
   const existingCompany = await prisma.company.findUnique({
     where: { name },
@@ -20,6 +29,17 @@ exports.createCompany = async (companyData) => {
       logo,
       industry,
       companySize,
+      ownerId,
+    },
+    include: {
+      owner: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
     },
   });
 
@@ -290,4 +310,154 @@ exports.getCompanyEmployers = async (companyId) => {
   });
 
   return employers;
+};
+
+// Get company by owner ID (for COMPANY role users)
+exports.getCompanyByOwnerId = async (ownerId) => {
+  const company = await prisma.company.findFirst({
+    where: { ownerId },
+    include: {
+      owner: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+      employers: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+          _count: {
+            select: {
+              jobs: true,
+            },
+          },
+        },
+        orderBy: {
+          joinedAt: 'desc',
+        },
+      },
+      jobs: {
+        include: {
+          _count: {
+            select: {
+              applications: true,
+            },
+          },
+          employer: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          applications: {
+            include: {
+              applicant: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                  bio: true,
+                  skills: true,
+                  resume: true,
+                  profilePhoto: true,
+                },
+              },
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+      _count: {
+        select: { 
+          jobs: true,
+          employers: true,
+        },
+      },
+    },
+  });
+
+  return company;
+};
+
+// Update company by owner
+exports.updateCompanyByOwner = async (ownerId, updateData) => {
+  const company = await prisma.company.findFirst({
+    where: { ownerId },
+  });
+
+  if (!company) {
+    throw new AppError('Company not found or you do not own any company', 404);
+  }
+
+  // Check if updating name and it conflicts
+  if (updateData.name && updateData.name !== company.name) {
+    const existingCompany = await prisma.company.findUnique({
+      where: { name: updateData.name },
+    });
+
+    if (existingCompany) {
+      throw new AppError('Company with this name already exists', 400);
+    }
+  }
+
+  const updatedCompany = await prisma.company.update({
+    where: { id: company.id },
+    data: updateData,
+    include: {
+      owner: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+      _count: {
+        select: { 
+          jobs: true,
+          employers: true,
+        },
+      },
+    },
+  });
+
+  return updatedCompany;
+};
+
+// Calculate profile completion percentage
+exports.getProfileCompletion = (company) => {
+  const requiredFields = ['name', 'description', 'website', 'location', 'logo', 'industry', 'companySize'];
+  const completedFields = requiredFields.filter(field => company[field] && company[field].length > 0);
+  
+  const percentage = Math.round((completedFields.length / requiredFields.length) * 100);
+  
+  const missingFields = requiredFields.filter(field => !company[field] || company[field].length === 0);
+  
+  return {
+    percentage,
+    completedFields: completedFields.length,
+    totalFields: requiredFields.length,
+    missingFields,
+    isComplete: percentage === 100,
+  };
 };

@@ -3,7 +3,7 @@ require('dotenv').config();
 module.exports = {
   // Default backend port (override by setting PORT env var if needed)
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: process.env.PORT || 3001,
+  PORT: process.env.PORT || 5001,
   DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/careerforge',
   JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
   JWT_EXPIRE: process.env.JWT_EXPIRE || '7d',
@@ -12,7 +12,7 @@ module.exports = {
   // Google OAuth Configuration
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/google/callback',
+  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5001/api/v1/auth/google/callback',
 
   // Session Configuration
   SESSION_SECRET: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',

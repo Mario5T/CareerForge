@@ -27,13 +27,48 @@ async function main() {
     },
   });
 
+  // Create COMPANY role users (company owners)
+  const companyOwner1 = await prisma.user.create({
+    data: {
+      name: 'Michael TechCorp CEO',
+      email: 'ceo@techcorp.com',
+      password: hashedPassword,
+      role: 'COMPANY',
+      phone: '+1234567891',
+      bio: 'CEO & Founder of TechCorp Inc.',
+    },
+  });
+
+  const companyOwner2 = await prisma.user.create({
+    data: {
+      name: 'Emma InnovateLabs Founder',
+      email: 'founder@innovate.com',
+      password: hashedPassword,
+      role: 'COMPANY',
+      phone: '+1234567892',
+      bio: 'Founder of InnovateLabs',
+    },
+  });
+
+  const companyOwner3 = await prisma.user.create({
+    data: {
+      name: 'David Design Director',
+      email: 'director@designstudio.com',
+      password: hashedPassword,
+      role: 'COMPANY',
+      phone: '+1234567893',
+      bio: 'Creative Director at Design Studio',
+    },
+  });
+
+  // Create RECRUITER role users
   const recruiter1 = await prisma.user.create({
     data: {
       name: 'John Recruiter',
       email: 'john@techcorp.com',
       password: hashedPassword,
       role: 'RECRUITER',
-      phone: '+1234567891',
+      phone: '+1234567894',
       bio: 'Senior Recruiter at TechCorp',
     },
   });
@@ -44,7 +79,7 @@ async function main() {
       email: 'sarah@innovate.com',
       password: hashedPassword,
       role: 'RECRUITER',
-      phone: '+1234567892',
+      phone: '+1234567895',
       bio: 'HR Manager at InnovateLabs',
     },
   });
@@ -55,7 +90,7 @@ async function main() {
       email: 'alice@example.com',
       password: hashedPassword,
       role: 'USER',
-      phone: '+1234567893',
+      phone: '+1234567896',
       bio: 'Full Stack Developer with 5 years experience',
       skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'],
     },
@@ -67,7 +102,7 @@ async function main() {
       email: 'bob@example.com',
       password: hashedPassword,
       role: 'USER',
-      phone: '+1234567894',
+      phone: '+1234567897',
       bio: 'UI/UX Designer passionate about user experience',
       skills: ['Figma', 'Adobe XD', 'Sketch', 'Prototyping'],
     },
@@ -75,7 +110,7 @@ async function main() {
 
   console.log('✅ Users created');
 
-  // Create companies
+  // Create companies with owners
   const techCorp = await prisma.company.create({
     data: {
       name: 'TechCorp Inc.',
@@ -85,6 +120,7 @@ async function main() {
       logo: 'https://via.placeholder.com/150',
       industry: 'Technology',
       companySize: 'SIZE_201_500',
+      ownerId: companyOwner1.id,
     },
   });
 
@@ -97,6 +133,7 @@ async function main() {
       logo: 'https://via.placeholder.com/150',
       industry: 'Software',
       companySize: 'SIZE_51_200',
+      ownerId: companyOwner2.id,
     },
   });
 
@@ -109,6 +146,7 @@ async function main() {
       logo: 'https://via.placeholder.com/150',
       industry: 'Design',
       companySize: 'SIZE_11_50',
+      ownerId: companyOwner3.id,
     },
   });
 
@@ -313,11 +351,23 @@ async function main() {
 
   console.log('\n🎉 Seed completed successfully!\n');
   console.log('📧 Test Accounts:');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('Admin:');
   console.log('  Email: admin@careerforge.com');
   console.log('  Password: password123');
-  console.log('\nRecruiters:');
+  console.log('\nCompany Owners (COMPANY role):');
+  console.log('  Email: ceo@techcorp.com');
+  console.log('  Password: password123');
+  console.log('  Company: TechCorp Inc.');
+  console.log('');
+  console.log('  Email: founder@innovate.com');
+  console.log('  Password: password123');
+  console.log('  Company: InnovateLabs');
+  console.log('');
+  console.log('  Email: director@designstudio.com');
+  console.log('  Password: password123');
+  console.log('  Company: Creative Design Studio');
+  console.log('\nRecruiters (RECRUITER role):');
   console.log('  Email: john@techcorp.com');
   console.log('  Password: password123');
   console.log('  Company: TechCorp Inc.');
@@ -325,16 +375,17 @@ async function main() {
   console.log('  Email: sarah@innovate.com');
   console.log('  Password: password123');
   console.log('  Company: InnovateLabs');
-  console.log('\nJob Seekers:');
+  console.log('\nJob Seekers (USER role):');
   console.log('  Email: alice@example.com');
   console.log('  Password: password123');
   console.log('');
   console.log('  Email: bob@example.com');
   console.log('  Password: password123');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(`\n📊 Created:`);
-  console.log(`  - 5 Users (1 Admin, 2 Recruiters, 2 Job Seekers)`);
-  console.log(`  - 3 Companies`);
+  console.log(`  - 8 Users (1 Admin, 3 Company Owners, 2 Recruiters, 2 Job Seekers)`);
+  console.log(`  - 3 Companies (each owned by a COMPANY role user)`);
+  console.log(`  - 2 Employer relationships (Recruiters linked to Companies)`);
   console.log(`  - 6 Jobs`);
   console.log(`  - 3 Applications`);
 }

@@ -91,3 +91,67 @@ exports.getCompanyEmployers = async (req, res) => {
     errorResponse(res, error.statusCode || 500, error.message);
   }
 };
+
+// COMPANY role: Get own company
+exports.getMyCompany = async (req, res) => {
+  try {
+    const company = await companyService.getCompanyByOwnerId(req.user.id);
+    
+    if (!company) {
+      return successResponse(res, 200, 'No company found', { company: null, hasCompany: false });
+    }
+
+    const profileCompletion = companyService.getProfileCompletion(company);
+    
+    successResponse(res, 200, 'Company retrieved successfully', {
+      company,
+      profileCompletion,
+      hasCompany: true,
+    });
+  } catch (error) {
+    logger.error(`Get my company error: ${error.message}`);
+    errorResponse(res, error.statusCode || 500, error.message);
+  }
+};
+
+// COMPANY role: Create own company
+exports.createMyCompany = async (req, res) => {
+  try {
+    // Check if user has COMPANY role
+    if (req.user.role !== 'COMPANY') {
+      return errorResponse(res, 403, 'Only users with COMPANY role can create a company');
+    }
+
+    const company = await companyService.createCompany(req.body, req.user.id);
+    const profileCompletion = companyService.getProfileCompletion(company);
+
+    successResponse(res, 201, 'Company created successfully', {
+      company,
+      profileCompletion,
+    });
+  } catch (error) {
+    logger.error(`Create my company error: ${error.message}`);
+    errorResponse(res, error.statusCode || 500, error.message);
+  }
+};
+
+// COMPANY role: Update own company
+exports.updateMyCompany = async (req, res) => {
+  try {
+    // Check if user has COMPANY role
+    if (req.user.role !== 'COMPANY') {
+      return errorResponse(res, 403, 'Only users with COMPANY role can update their company');
+    }
+
+    const company = await companyService.updateCompanyByOwner(req.user.id, req.body);
+    const profileCompletion = companyService.getProfileCompletion(company);
+
+    successResponse(res, 200, 'Company updated successfully', {
+      company,
+      profileCompletion,
+    });
+  } catch (error) {
+    logger.error(`Update my company error: ${error.message}`);
+    errorResponse(res, error.statusCode || 500, error.message);
+  }
+};

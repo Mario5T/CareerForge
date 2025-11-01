@@ -18,4 +18,9 @@ router.post('/:id/employers', validate(companyValidation.addEmployer), companyCo
 router.delete('/:id/employers', validate(companyValidation.removeEmployer), companyController.removeEmployer);
 router.get('/:id/employers', companyController.getCompanyEmployers);
 
+// COMPANY role routes - manage own company
+router.get('/my-company/profile', companyController.getMyCompany);
+router.post('/my-company/profile', validate(companyValidation.create), companyController.createMyCompany);
+router.put('/my-company/profile', validate(companyValidation.update), companyController.updateMyCompany);
+
 module.exports = router;

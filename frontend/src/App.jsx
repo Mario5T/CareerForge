@@ -21,6 +21,10 @@ import Companies from './pages/companies/Companies';
 import NotFound from './pages/NotFound';
 import PostJob from './pages/employer/PostJob';
 import ManageJobs from './pages/employer/ManageJobs';
+import CompanyProfile from './pages/company/CompanyProfile';
+import CompanyJobs from './pages/company/CompanyJobs';
+import CompanyRecruiters from './pages/company/CompanyRecruiters';
+import CompanyApplications from './pages/company/CompanyApplications';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -95,6 +99,43 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute>
                 <PostJob />
+              </ProtectedRoute>
+            ),
+          },
+        ],
+      },
+      {
+        path: 'company',
+        children: [
+          {
+            path: 'profile',
+            element: (
+              <ProtectedRoute>
+                <CompanyProfile />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'jobs',
+            element: (
+              <ProtectedRoute>
+                <CompanyJobs />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'recruiters',
+            element: (
+              <ProtectedRoute>
+                <CompanyRecruiters />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'applications',
+            element: (
+              <ProtectedRoute>
+                <CompanyApplications />
               </ProtectedRoute>
             ),
           },
