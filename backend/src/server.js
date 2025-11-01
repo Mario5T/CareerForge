@@ -6,6 +6,7 @@ const logger = require('./utils/logger');
 process.on('uncaughtException', (err) => {
   logger.error(`UNCAUGHT EXCEPTION! 💥 Shutting down...`);
   logger.error(err.name, err.message);
+  console.error('Full error stack:', err.stack);
   process.exit(1);
 });
 

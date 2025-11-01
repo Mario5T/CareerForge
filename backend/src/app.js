@@ -84,7 +84,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/employer', employerRoutes);
 app.use('/api/v1/jobs', jobRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

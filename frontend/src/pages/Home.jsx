@@ -18,7 +18,7 @@ const Home = () => {
             <Link to="/jobs">Find Jobs</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link to="/auth/register">Post a Job</Link>
+            <Link to="/employer/post-job">Post a Job</Link>
           </Button>
         </div>
       </div>
