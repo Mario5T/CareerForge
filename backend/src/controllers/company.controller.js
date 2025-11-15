@@ -1,6 +1,8 @@
 const companyService = require('../services/company.service');
 const { successResponse, errorResponse } = require('../utils/response');
 const logger = require('../utils/logger');
+const { prisma } = require('../config/db');
+const { AppError } = require('../utils/errorHandler');
 
 exports.createCompany = async (req, res) => {
   try {
@@ -61,10 +63,24 @@ exports.deleteCompany = async (req, res) => {
 
 exports.addEmployer = async (req, res) => {
   try {
+    const { email, title, department } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    if (user.role !== 'RECRUITER') {
+      throw new AppError('User must have RECRUITER role to be added as a recruiter', 400);
+    }
+
     const employer = await companyService.addEmployerToCompany(
       req.params.id,
-      req.body.userId,
-      req.body
+      user.id,
+      { title, department }
     );
     successResponse(res, 201, 'Employer added to company successfully', employer);
   } catch (error) {

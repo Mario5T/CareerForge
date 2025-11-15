@@ -379,7 +379,7 @@ exports.getCompanyByOwnerId = async (ownerId) => {
               },
             },
             orderBy: {
-              createdAt: 'desc',
+              appliedAt: 'desc',
             },
           },
         },

@@ -91,3 +91,17 @@ exports.getCompanyJobs = async (req, res) => {
     errorResponse(res, error.statusCode || 500, error.message);
   }
 };
+
+exports.updateApplicationStatus = async (req, res) => {
+  try {
+    const application = await employerService.updateApplicationStatus(
+      req.params.applicationId,
+      req.user.id,
+      req.body.status
+    );
+    successResponse(res, 200, 'Application status updated successfully', application);
+  } catch (error) {
+    logger.error(`Update application status error: ${error.message}`);
+    errorResponse(res, error.statusCode || 500, error.message);
+  }
+};

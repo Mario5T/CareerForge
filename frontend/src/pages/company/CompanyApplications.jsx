@@ -13,6 +13,7 @@ import {
   TrendingUp, AlertCircle, UserCheck
 } from 'lucide-react';
 import companyService from '../../services/company.service';
+import employerService from '../../services/employer.service';
 import { selectCurrentUser } from '../../store/slices/auth/authSlice';
 
 const CompanyApplications = () => {
@@ -125,7 +126,7 @@ const CompanyApplications = () => {
 
   const handleStatusChange = async (applicationId, newStatus) => {
     try {
-      // TODO: Implement update application status endpoint
+      await employerService.updateApplicationStatus(applicationId, newStatus);
       toast({
         title: 'Success',
         description: `Application ${newStatus.toLowerCase()}`,

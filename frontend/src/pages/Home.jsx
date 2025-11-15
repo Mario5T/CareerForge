@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, MapPin, DollarSign } from 'lucide-react';
 import { selectCurrentUser } from '../store/slices/auth/authSlice';
+import companyService from '../services/company.service';
 
 const Home = () => {
   const user = useSelector(selectCurrentUser);
@@ -45,8 +47,67 @@ const Home = () => {
     return `Up to ${formatter.format(max)}`;
   };
 
+  const [companyStats, setCompanyStats] = useState({
+    activeJobs: 0,
+    totalApplications: 0,
+    recruiters: 0,
+    profileCompletion: 0,
+    loading: true,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (user?.role !== 'COMPANY') return;
+
+      try {
+        const response = await companyService.getMyCompany();
+
+        if (!response.data?.hasCompany || !response.data.company) {
+          setCompanyStats((prev) => ({ ...prev, loading: false }));
+          return;
+        }
+
+        const company = response.data.company;
+        const jobs = company.jobs || [];
+        const employers = company.employers || [];
+
+        const activeJobs = jobs.filter((job) => job.isActive !== false).length;
+        const totalApplications = jobs.reduce(
+          (sum, job) => sum + (job.applications ? job.applications.length : 0),
+          0
+        );
+
+        const recruiters = employers.length;
+        const profileCompletion = response.data.profileCompletion?.percentage || 0;
+
+        setCompanyStats({
+          activeJobs,
+          totalApplications,
+          recruiters,
+          profileCompletion,
+          loading: false,
+        });
+      } catch {
+        setCompanyStats((prev) => ({ ...prev, loading: false }));
+      }
+    };
+
+    fetchStats();
+
+    const handleCompanyDataUpdated = () => {
+      fetchStats();
+    };
+
+    window.addEventListener('companyDataUpdated', handleCompanyDataUpdated);
+
+    return () => {
+      window.removeEventListener('companyDataUpdated', handleCompanyDataUpdated);
+    };
+  }, [user?.role, user?.id]);
+
   // Company Dashboard View
   if (user?.role === 'COMPANY') {
+    const { activeJobs, totalApplications, recruiters, profileCompletion } = companyStats;
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -62,7 +123,7 @@ const Home = () => {
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{activeJobs}</div>
               <p className="text-xs text-muted-foreground">Jobs currently open</p>
             </CardContent>
           </Card>
@@ -73,7 +134,7 @@ const Home = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{totalApplications}</div>
               <p className="text-xs text-muted-foreground">Pending review</p>
             </CardContent>
           </Card>
@@ -84,7 +145,7 @@ const Home = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{recruiters}</div>
               <p className="text-xs text-muted-foreground">Team members</p>
             </CardContent>
           </Card>
@@ -95,7 +156,7 @@ const Home = () => {
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0%</div>
+              <div className="text-2xl font-bold">{profileCompletion}%</div>
               <p className="text-xs text-muted-foreground">Profile complete</p>
             </CardContent>
           </Card>

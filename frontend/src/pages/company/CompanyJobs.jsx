@@ -282,7 +282,7 @@ const CompanyJobs = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/company/jobs/${job.id}/applicants`)}
+                      onClick={() => navigate(`/company/applications?jobId=${job.id}`)}
                       className="w-full"
                     >
                       <Users className="h-4 w-4 mr-2" />
@@ -294,7 +294,7 @@ const CompanyJobs = () => {
                       asChild
                       className="w-full"
                     >
-                      <Link to={`/employer/jobs/${job.id}/edit`}>
+                      <Link to="/employer/jobs">
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Job
                       </Link>
