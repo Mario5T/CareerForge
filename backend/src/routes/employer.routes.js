@@ -15,5 +15,6 @@ router.get('/jobs/company', protect, employerController.getCompanyJobs);
 router.put('/jobs/:jobId', protect, validate(jobValidation.update), employerController.updateJob);
 router.delete('/jobs/:jobId', protect, employerController.deleteJob);
 router.get('/jobs/:jobId/applicants', protect, employerController.getApplicantsForJob);
+router.patch('/applications/:applicationId/status', protect, validate(jobValidation.updateApplicationStatus), employerController.updateApplicationStatus);
 
 module.exports = router; 

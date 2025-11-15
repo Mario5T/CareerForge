@@ -86,7 +86,7 @@ const CompanyRecruiters = () => {
     try {
       setAddingRecruiter(true);
       
-      // TODO: Implement add recruiter endpoint
+      // Add recruiter via backend endpoint
       await companyService.addEmployer(company.id, {
         email: recruiterEmail,
         title: recruiterTitle,
@@ -106,6 +106,9 @@ const CompanyRecruiters = () => {
       
       // Refresh list
       fetchCompanyAndRecruiters();
+
+      // Notify other parts of the app (e.g., Company Home) that company data has changed
+      window.dispatchEvent(new CustomEvent('companyDataUpdated'));
     } catch (error) {
       toast({
         title: 'Error',
@@ -123,7 +126,7 @@ const CompanyRecruiters = () => {
     }
 
     try {
-      // TODO: Implement remove recruiter endpoint
+      // Remove recruiter via backend endpoint
       await companyService.removeEmployer(company.id, { userId: employerId });
 
       toast({
@@ -132,6 +135,9 @@ const CompanyRecruiters = () => {
       });
 
       fetchCompanyAndRecruiters();
+
+      // Notify other parts of the app (e.g., Company Home) that company data has changed
+      window.dispatchEvent(new CustomEvent('companyDataUpdated'));
     } catch (error) {
       toast({
         title: 'Error',

@@ -78,6 +78,14 @@ export const employerService = {
       throw error.response?.data || error.message;
     }
   },
+  updateApplicationStatus: async (applicationId, status) => {
+    try {
+      const response = await api.patch(`/employer/applications/${applicationId}/status`, { status });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
 };
 
 export default employerService;

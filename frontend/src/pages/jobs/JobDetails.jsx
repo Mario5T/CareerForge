@@ -21,7 +21,8 @@ import {
   XCircle,
   Users,
   Flag,
-  Link2
+  Link2,
+  ArrowRight,
 } from 'lucide-react';
 import jobService from '../../services/job.service';
 
@@ -71,7 +72,9 @@ const JobDetails = () => {
     };
 
     fetchJob();
-  }, [id, toast]);
+    // We intentionally only depend on `id` here to avoid re-running
+    // when the `toast` function identity changes on each render.
+  }, [id]);
 
   const handleApply = async () => {
     if (!isAuthenticated) {

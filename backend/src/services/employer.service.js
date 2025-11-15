@@ -2,7 +2,7 @@ const { prisma } = require('../config/db');
 const { AppError } = require('../utils/errorHandler');
 
 exports.createCompanyProfile = async (userId, data) => {
-  const existingEmployer = await prisma.employer.findUnique({
+  const existingEmployer = await prisma.employer.findFirst({
     where: { userId },
   });
   if (existingEmployer) throw new AppError('You already have an employer profile', 400);
@@ -62,7 +62,7 @@ exports.createCompanyProfile = async (userId, data) => {
 };
 
 exports.updateCompanyProfile = async (userId, data) => {
-  const employer = await prisma.employer.findUnique({
+  const employer = await prisma.employer.findFirst({
     where: { userId },
     include: { company: true },
   });
@@ -95,7 +95,7 @@ exports.updateCompanyProfile = async (userId, data) => {
 };
 
 exports.getMyCompany = async (userId) => {
-  const employer = await prisma.employer.findUnique({
+  const employer = await prisma.employer.findFirst({
     where: { userId },
     include: {
       company: {
@@ -135,7 +135,7 @@ exports.getMyCompany = async (userId) => {
   return employer;
 };
 exports.getMyJobs = async (userId) => {
-  const employer = await prisma.employer.findUnique({
+  const employer = await prisma.employer.findFirst({
     where: { userId },
     include: {
       company: {
@@ -194,8 +194,7 @@ exports.getApplicantsForJob = async (jobId, userId) => {
 };
 
 exports.createJob = async (userId, jobData) => {
-
-  const employer = await prisma.employer.findUnique({
+  const employer = await prisma.employer.findFirst({
     where: { userId },
     include: { company: true },
   });
@@ -282,7 +281,7 @@ exports.deleteJob = async (jobId, userId) => {
   });
 };
 exports.getCompanyJobs = async (userId) => {
-  const employer = await prisma.employer.findUnique({
+  const employer = await prisma.employer.findFirst({
     where: { userId },
     include: {
       company: {
@@ -312,4 +311,33 @@ exports.getCompanyJobs = async (userId) => {
   if (!employer) throw new AppError('Employer profile not found', 404);
 
   return employer.company.jobs;
+};
+
+exports.updateApplicationStatus = async (applicationId, userId, status) => {
+  const application = await prisma.application.findUnique({
+    where: { id: applicationId },
+    include: {
+      job: true,
+    },
+  });
+
+  if (!application) throw new AppError('Application not found', 404);
+
+  const userEmployer = await prisma.employer.findUnique({
+    where: {
+      userId_companyId: {
+        userId,
+        companyId: application.job.companyId,
+      },
+    },
+  });
+
+  if (!userEmployer) throw new AppError('Not authorized to update this application', 403);
+
+  const updated = await prisma.application.update({
+    where: { id: applicationId },
+    data: { status },
+  });
+
+  return updated;
 };

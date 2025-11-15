@@ -107,7 +107,7 @@ exports.companyValidation = {
       .withMessage('Invalid company size'),
   ],
   addEmployer: [
-    body('userId').isUUID().withMessage('Valid user ID is required'),
+    body('email').isEmail().withMessage('Valid recruiter email is required'),
     body('title').optional().trim(),
     body('department').optional().trim(),
   ],
