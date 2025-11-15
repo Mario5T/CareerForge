@@ -320,6 +320,156 @@ async function main() {
     },
   });
 
+  const job7 = await prisma.job.create({
+    data: {
+      title: 'Backend Engineer',
+      description: 'Build robust backend systems and APIs. Work with microservices, databases, and cloud infrastructure.',
+      requirements: [
+        '4+ years of backend development experience',
+        'Proficiency in Node.js, Python, or Java',
+        'Experience with RESTful APIs and GraphQL',
+        'Database design and optimization skills',
+        'Understanding of system design principles',
+      ],
+      salaryMin: 110000,
+      salaryMax: 150000,
+      salaryCurrency: 'USD',
+      location: 'San Francisco, CA',
+      jobType: 'FULL_TIME',
+      experienceLevel: 'SENIOR',
+      positions: 2,
+      isActive: true,
+      companyId: techCorp.id,
+      employerId: employer1.id,
+      createdById: recruiter1.id,
+    },
+  });
+
+  const job8 = await prisma.job.create({
+    data: {
+      title: 'Product Manager',
+      description: 'Lead product strategy and development. Work with cross-functional teams to deliver amazing products.',
+      requirements: [
+        '5+ years of product management experience',
+        'Strong analytical and communication skills',
+        'Experience with agile methodologies',
+        'Data-driven decision making',
+        'Track record of successful product launches',
+      ],
+      salaryMin: 130000,
+      salaryMax: 180000,
+      salaryCurrency: 'USD',
+      location: 'New York, NY',
+      jobType: 'FULL_TIME',
+      experienceLevel: 'SENIOR',
+      positions: 1,
+      isActive: true,
+      companyId: innovateLabs.id,
+      employerId: employer2.id,
+      createdById: recruiter2.id,
+    },
+  });
+
+  const job9 = await prisma.job.create({
+    data: {
+      title: 'QA Engineer',
+      description: 'Ensure quality of our products through comprehensive testing. Develop test strategies and automation frameworks.',
+      requirements: [
+        '3+ years of QA experience',
+        'Experience with automated testing frameworks',
+        'Knowledge of testing methodologies',
+        'Bug tracking and reporting skills',
+        'Attention to detail',
+      ],
+      salaryMin: 80000,
+      salaryMax: 110000,
+      salaryCurrency: 'USD',
+      location: 'Remote',
+      jobType: 'FULL_TIME',
+      experienceLevel: 'MID',
+      positions: 2,
+      isActive: true,
+      companyId: techCorp.id,
+      employerId: employer1.id,
+      createdById: recruiter1.id,
+    },
+  });
+
+  const job10 = await prisma.job.create({
+    data: {
+      title: 'Data Scientist',
+      description: 'Analyze complex datasets and build machine learning models. Drive data-driven insights for business decisions.',
+      requirements: [
+        '3+ years of data science experience',
+        'Proficiency in Python and R',
+        'Machine learning and statistical analysis skills',
+        'Experience with big data tools',
+        'Strong communication skills',
+      ],
+      salaryMin: 120000,
+      salaryMax: 160000,
+      salaryCurrency: 'USD',
+      location: 'San Francisco, CA',
+      jobType: 'FULL_TIME',
+      experienceLevel: 'MID',
+      positions: 1,
+      isActive: true,
+      companyId: techCorp.id,
+      employerId: employer1.id,
+      createdById: recruiter1.id,
+    },
+  });
+
+  const job11 = await prisma.job.create({
+    data: {
+      title: 'Graphic Designer',
+      description: 'Create visually stunning graphics and designs. Collaborate with marketing and product teams.',
+      requirements: [
+        '2+ years of graphic design experience',
+        'Proficiency in Adobe Creative Suite',
+        'Strong portfolio',
+        'Understanding of design principles',
+        'Attention to detail',
+      ],
+      salaryMin: 70000,
+      salaryMax: 95000,
+      salaryCurrency: 'USD',
+      location: 'Austin, TX',
+      jobType: 'FULL_TIME',
+      experienceLevel: 'MID',
+      positions: 1,
+      isActive: true,
+      companyId: designStudio.id,
+      employerId: employer2.id,
+      createdById: recruiter2.id,
+    },
+  });
+
+  const job12 = await prisma.job.create({
+    data: {
+      title: 'Security Engineer',
+      description: 'Protect our systems and data. Implement security best practices and conduct vulnerability assessments.',
+      requirements: [
+        '5+ years of security engineering experience',
+        'Knowledge of network security and cryptography',
+        'Experience with penetration testing',
+        'Understanding of compliance standards',
+        'Problem-solving mindset',
+      ],
+      salaryMin: 130000,
+      salaryMax: 170000,
+      salaryCurrency: 'USD',
+      location: 'San Francisco, CA',
+      jobType: 'FULL_TIME',
+      experienceLevel: 'SENIOR',
+      positions: 1,
+      isActive: true,
+      companyId: techCorp.id,
+      employerId: employer1.id,
+      createdById: recruiter1.id,
+    },
+  });
+
   console.log('✅ Jobs created');
 
   // Create some applications
@@ -386,7 +536,7 @@ async function main() {
   console.log(`  - 8 Users (1 Admin, 3 Company Owners, 2 Recruiters, 2 Job Seekers)`);
   console.log(`  - 3 Companies (each owned by a COMPANY role user)`);
   console.log(`  - 2 Employer relationships (Recruiters linked to Companies)`);
-  console.log(`  - 6 Jobs`);
+  console.log(`  - 12 Jobs`);
   console.log(`  - 3 Applications`);
 }
 
