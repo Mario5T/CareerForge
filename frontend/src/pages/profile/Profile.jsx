@@ -5,6 +5,9 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { useToast } from '../../components/ui/use-toast';
+import api from '../../services/api';
+import { PREDEFINED_SKILLS } from '../../constants/skills';
+import { X } from 'lucide-react';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -22,6 +25,8 @@ const Profile = () => {
     experience: [],
     education: [],
   });
+  const [skillSearch, setSkillSearch] = useState('');
+  const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   useEffect(() => {
     if (user) {
       setProfile({
@@ -69,11 +74,33 @@ const Profile = () => {
     }));
   };
 
+  const addSkillFromDropdown = (skill) => {
+    if (!profile.skills.includes(skill)) {
+      setProfile(prev => ({
+        ...prev,
+        skills: [...prev.skills, skill]
+      }));
+    }
+    setSkillSearch('');
+    setShowSkillDropdown(false);
+  };
+
+  const filteredSkills = PREDEFINED_SKILLS.filter(skill =>
+    skill.toLowerCase().includes(skillSearch.toLowerCase()) &&
+    !profile.skills.includes(skill)
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
+      const response = await api.put('/users/profile', {
+        name: profile.name,
+        phone: profile.phone,
+        bio: profile.bio,
+        skills: profile.skills.filter(skill => skill.trim() !== ''),
+      });
       
       toast({
         title: 'Success',
@@ -85,7 +112,7 @@ const Profile = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update profile',
+        description: error.response?.data?.message || error.message || 'Failed to update profile',
         variant: 'destructive',
       });
     } finally {
@@ -205,36 +232,56 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              {profile.skills.map((skill, index) => (
-                <div key={index} className="flex items-center space-x-2">
+              {/* Display selected skills as badges */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {profile.skills.map((skill, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                  >
+                    <span>{skill}</span>
+                    {isEditing && (
+                      <button
+                        onClick={() => removeSkill(index)}
+                        className="hover:text-blue-600 cursor-pointer"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Skill search dropdown */}
+              {isEditing && (
+                <div className="relative">
                   <Input
-                    value={skill}
-                    onChange={(e) => handleSkillChange(index, e.target.value)}
-                    disabled={!isEditing}
-                    placeholder="Skill name"
+                    type="text"
+                    placeholder="Search and add skills..."
+                    value={skillSearch}
+                    onChange={(e) => {
+                      setSkillSearch(e.target.value);
+                      setShowSkillDropdown(true);
+                    }}
+                    onFocus={() => setShowSkillDropdown(true)}
+                    className="w-full"
                   />
-                  {isEditing && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeSkill(index)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                  
+                  {/* Dropdown list */}
+                  {showSkillDropdown && skillSearch && filteredSkills.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                      {filteredSkills.slice(0, 10).map((skill) => (
+                        <button
+                          key={skill}
+                          onClick={() => addSkillFromDropdown(skill)}
+                          className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors"
+                        >
+                          {skill}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
-              ))}
-              {isEditing && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={addSkill}
-                >
-                  <Plus className="mr-2 h-4 w-4" /> Add Skill
-                </Button>
               )}
             </div>
           </CardContent>

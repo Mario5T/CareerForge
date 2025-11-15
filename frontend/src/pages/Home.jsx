@@ -1,14 +1,51 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, MapPin, DollarSign } from 'lucide-react';
 import { selectCurrentUser } from '../store/slices/auth/authSlice';
 import companyService from '../services/company.service';
 
 const Home = () => {
   const user = useSelector(selectCurrentUser);
+  const [featuredJobs, setFeaturedJobs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchFeaturedJobs = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/v1/jobs');
+        if (!response.ok) throw new Error('Failed to fetch jobs');
+        const data = await response.json();
+        // Get first 6 jobs for featured section
+        setFeaturedJobs((data.data || []).slice(0, 6));
+      } catch (err) {
+        console.error('Error fetching featured jobs:', err);
+        setError('Failed to load featured jobs');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeaturedJobs();
+  }, []);
+
+  const formatSalary = (min, max, currency = 'USD') => {
+    if (!min && !max) return 'Salary not specified';
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+    
+    if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`;
+    if (min) return `From ${formatter.format(min)}`;
+    return `Up to ${formatter.format(max)}`;
+  };
 
   const [companyStats, setCompanyStats] = useState({
     activeJobs: 0,
@@ -224,6 +261,23 @@ const Home = () => {
           Whether you're looking for your next career move or your next hire,
           we've got you covered.
         </p>
+        
+        {/* Search Bar */}
+        <div className="mt-8 max-w-2xl mx-auto">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search for jobs, companies, or skills..."
+              className="w-full px-6 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+            />
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
         <div className="mt-10 flex justify-center gap-4">
           <Button asChild>
             <Link to="/jobs">Find Jobs</Link>
@@ -234,19 +288,82 @@ const Home = () => {
         </div>
       </div>
       <section className="mt-20">
-        <h2 className="text-2xl font-semibold mb-6">Featured Jobs</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
-            <h3 className="font-medium text-lg">Frontend Developer</h3>
-            <p className="text-gray-600 mt-1">TechCorp • New York, NY</p>
-            <p className="mt-3 text-sm text-gray-500 line-clamp-2">
-              We're looking for an experienced Frontend Developer to join our team...
-            </p>
-            <Button variant="link" className="mt-4 p-0 h-auto">
-              View Details
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold">Featured Jobs</h2>
+          <Link to="/jobs" className="text-blue-600 hover:underline">View all jobs →</Link>
+        </div>
+        
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="border rounded-lg p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded"></div>
+                  <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-red-500">{error}</p>
+            <Button 
+              variant="outline" 
+              className="mt-4"
+              onClick={() => window.location.reload()}
+            >
+              Retry
             </Button>
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredJobs.length > 0 ? (
+              featuredJobs.map((job) => (
+                <Link 
+                  key={job.id} 
+                  to={`/jobs/${job.id}`}
+                  className="block border rounded-lg p-6 hover:shadow-md transition-shadow hover:border-blue-200"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold text-lg">{job.title}</h3>
+                      <p className="text-gray-600 mt-1">
+                        {job.company?.name || 'Company'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center text-sm text-gray-500">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      <span>{job.location}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      <span>{formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency)}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Briefcase className="h-4 w-4 mr-2" />
+                      <span className="capitalize">{job.jobType.toLowerCase().replace('_', ' ')}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t">
+                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                      {job.experienceLevel}
+                    </span>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-8">
+                <p className="text-gray-500">No featured jobs available at the moment.</p>
+              </div>
+            )}
+          </div>
+        )}
       </section>
       <section className="mt-20">
         <h2 className="text-2xl font-semibold mb-8 text-center">How It Works</h2>

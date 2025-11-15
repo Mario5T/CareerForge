@@ -39,8 +39,8 @@ export const authService = {
 
   checkAuth: async () => {
     try {
-      const response = await api.get('/auth/status');
-      return response.data;
+      const response = await api.get('/users/profile');
+      return { user: response.data };
     } catch (error) {
       throw error.response?.data || error.message;
     }
