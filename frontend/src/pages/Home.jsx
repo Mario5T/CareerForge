@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, MapPin, DollarSign } from 'lucide-react';
@@ -17,7 +17,7 @@ const Home = () => {
   useEffect(() => {
     const fetchFeaturedJobs = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/v1/jobs');
+        const response = await fetch('http://localhost:5001/api/v1/jobs');
         if (!response.ok) throw new Error('Failed to fetch jobs');
         const data = await response.json();
         // Get first 6 jobs for featured section
