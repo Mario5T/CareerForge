@@ -141,17 +141,23 @@ exports.getMyJobs = async (userId) => {
       company: {
         select: { name: true, logo: true },
       },
-      jobs: {
-        include: {
-          _count: { select: { applications: true } },
-          company: { select: { name: true, logo: true } },
-        },
-      },
     },
   });
   if (!employer) throw new AppError('Employer profile not found', 404);
 
-  return employer.jobs;
+  // Only return jobs created by the current user
+  const jobs = await prisma.job.findMany({
+    where: {
+      createdById: userId,
+    },
+    include: {
+      _count: { select: { applications: true } },
+      company: { select: { name: true, logo: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return jobs;
 };
 
 exports.getApplicantsForJob = async (jobId, userId) => {
@@ -162,18 +168,10 @@ exports.getApplicantsForJob = async (jobId, userId) => {
 
   if (!job) throw new AppError('Job not found', 404);
 
-  const userEmployer = await prisma.employer.findUnique({
-    where: {
-      userId_companyId: {
-        userId,
-        companyId: job.companyId,
-      },
-    },
-  });
+  // Check if user created this job
+  if (job.createdById !== userId) throw new AppError('Not authorized to view applicants for this job', 403);
 
-  if (!userEmployer) throw new AppError('Not authorized to view applicants for this job', 403);
-
-  const applicants = await prisma.application.findMany({
+  const applications = await prisma.application.findMany({
     where: { jobId },
     include: {
       applicant: {
@@ -190,7 +188,10 @@ exports.getApplicantsForJob = async (jobId, userId) => {
     },
   });
 
-  return applicants;
+  return {
+    job,
+    applications,
+  };
 };
 
 exports.createJob = async (userId, jobData) => {
