@@ -1,10 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-<<<<<<< HEAD
-=======
-
->>>>>>> 196baef5e91ac0174416786358d25dbb9a5962b8
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, MapPin, DollarSign, Edit2, Award, BookOpen } from 'lucide-react';
