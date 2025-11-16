@@ -6,7 +6,7 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { useToast } from '../../components/ui/use-toast';
 import { 
-  Plus, Edit, Trash2, Users, Eye, MapPin, Briefcase, 
+  Users, Eye, MapPin, Briefcase, 
   DollarSign, Loader2, TrendingUp, AlertCircle, CheckCircle2 
 } from 'lucide-react';
 import companyService from '../../services/company.service';
@@ -64,43 +64,7 @@ const CompanyJobs = () => {
     }
   };
 
-  const handleToggleStatus = async (jobId, currentStatus) => {
-    try {
-      // TODO: Implement toggle job status endpoint
-      toast({
-        title: 'Success',
-        description: `Job ${currentStatus ? 'deactivated' : 'activated'} successfully`,
-      });
-      fetchCompanyAndJobs();
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to update job status',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this job posting? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      // TODO: Implement delete job endpoint
-      toast({
-        title: 'Success',
-        description: 'Job deleted successfully',
-      });
-      fetchCompanyAndJobs();
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete job',
-        variant: 'destructive',
-      });
-    }
-  };
+  
 
   const getJobStats = () => {
     const totalJobs = jobs.length;
@@ -132,12 +96,7 @@ const CompanyJobs = () => {
               {company?.name} • View and manage all job postings
             </p>
           </div>
-          <Button asChild className="bg-[#6A38C2] hover:bg-[#5b30a6]">
-            <Link to="/employer/post-job">
-              <Plus className="h-4 w-4 mr-2" />
-              Post New Job
-            </Link>
-          </Button>
+          
         </div>
 
         {/* Stats Cards */}
@@ -198,16 +157,7 @@ const CompanyJobs = () => {
           <CardContent className="py-12 text-center">
             <Briefcase className="h-16 w-16 mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold mb-2">No jobs posted yet</h3>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              Start attracting top talent by posting your first job opening. 
-              It only takes a few minutes!
-            </p>
-            <Button asChild className="bg-[#6A38C2] hover:bg-[#5b30a6]">
-              <Link to="/employer/post-job">
-                <Plus className="h-4 w-4 mr-2" />
-                Post Your First Job
-              </Link>
-            </Button>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">No jobs to display.</p>
           </CardContent>
         </Card>
       ) : (
@@ -268,7 +218,7 @@ const CompanyJobs = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
+                  
                   <div className="flex flex-col gap-2 lg:w-48">
                     <Button
                       variant="default"
@@ -287,34 +237,6 @@ const CompanyJobs = () => {
                     >
                       <Users className="h-4 w-4 mr-2" />
                       View Applicants ({job._count?.applications || 0})
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="w-full"
-                    >
-                      <Link to="/employer/jobs">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Job
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleToggleStatus(job.id, job.isActive)}
-                      className="w-full"
-                    >
-                      {job.isActive ? 'Deactivate' : 'Activate'}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(job.id)}
-                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
                     </Button>
                   </div>
                 </div>

@@ -137,14 +137,6 @@ exports.getCompanyById = async (companyId) => {
             },
           },
         },
-        select: {
-          id: true,
-          title: true,
-          location: true,
-          jobType: true,
-          experienceLevel: true,
-          createdAt: true,
-        },
       },
     },
   });

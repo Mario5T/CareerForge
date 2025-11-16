@@ -18,6 +18,7 @@ import Profile from './pages/profile/Profile';
 import Jobs from './pages/jobs/Jobs';
 import JobDetails from './pages/jobs/JobDetails';
 import Companies from './pages/companies/Companies';
+import CompanyDetails from './pages/companies/CompanyDetails';
 import NotFound from './pages/NotFound';
 import PostJob from './pages/employer/PostJob';
 import ManageJobs from './pages/employer/ManageJobs';
@@ -29,6 +30,10 @@ import CompanyProfile from './pages/company/CompanyProfile';
 import CompanyJobs from './pages/company/CompanyJobs';
 import CompanyRecruiters from './pages/company/CompanyRecruiters';
 import CompanyApplications from './pages/company/CompanyApplications';
+import PublicProfile from './pages/profile/PublicProfile';
+import PublicUserProfile from './pages/profile/PublicUserProfile';
+import PublicRecruiterProfile from './pages/profile/PublicRecruiterProfile';
+import PublicCompanyProfile from './pages/profile/PublicCompanyProfile';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -73,6 +78,26 @@ const router = createBrowserRouter([
       {
         path: 'companies',
         element: <Companies />,
+      },
+      {
+        path: 'companies/:id',
+        element: <CompanyDetails />,
+      },
+      {
+        path: 'profiles/:id',
+        element: <PublicProfile />,
+      },
+      {
+        path: 'public/user/:id',
+        element: <PublicUserProfile />,
+      },
+      {
+        path: 'public/recruiter/:id',
+        element: <PublicRecruiterProfile />,
+      },
+      {
+        path: 'public/company/:id',
+        element: <PublicCompanyProfile />,
       },
       {
         path: 'profile',

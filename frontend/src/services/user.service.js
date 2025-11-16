@@ -9,6 +9,14 @@ export const userService = {
       throw error.response?.data || error.message;
     }
   },
+  getPublicProfile: async (userId) => {
+    try {
+      const response = await api.get(`/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
   updateProfile: async (userData) => {
     try {
       const response = await api.put('/users/profile', userData);

@@ -6,16 +6,23 @@ import { Badge } from '../../components/ui/badge';
 import { useToast } from '../../components/ui/use-toast';
 import { Plus, Edit, Trash2, Users, Eye, MapPin, Briefcase, DollarSign } from 'lucide-react';
 import employerService from '../../services/employer.service';
+import { useAuth } from '../../hooks/useAuth';
 
 const ManageJobs = () => {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isCompanyUser = user?.role === 'COMPANY';
 
   useEffect(() => {
+    if (isCompanyUser) {
+      navigate('/company/jobs', { replace: true });
+      return;
+    }
     fetchJobs();
-  }, []);
+  }, [isCompanyUser, navigate]);
 
   const fetchJobs = async () => {
     try {
@@ -73,12 +80,14 @@ const ManageJobs = () => {
           <h1 className="text-3xl font-bold mb-2">Manage Jobs</h1>
           <p className="text-muted-foreground">View and manage your job postings</p>
         </div>
-        <Button asChild>
-          <Link to="/employer/post-job">
-            <Plus className="h-4 w-4 mr-2" />
-            Post New Job
-          </Link>
-        </Button>
+        {!isCompanyUser && (
+          <Button asChild>
+            <Link to="/employer/post-job">
+              <Plus className="h-4 w-4 mr-2" />
+              Post New Job
+            </Link>
+          </Button>
+        )}
       </div>
 
       {jobs.length === 0 ? (
@@ -89,12 +98,14 @@ const ManageJobs = () => {
             <p className="text-muted-foreground mb-4">
               Start by creating your first job posting
             </p>
-            <Button asChild>
-              <Link to="/employer/post-job">
-                <Plus className="h-4 w-4 mr-2" />
-                Post Your First Job
-              </Link>
-            </Button>
+            {!isCompanyUser && (
+              <Button asChild>
+                <Link to="/employer/post-job">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Post Your First Job
+                </Link>
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -158,26 +169,30 @@ const ManageJobs = () => {
                       <Users className="h-4 w-4 mr-2" />
                       View Applicants
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="w-full"
-                    >
-                      <Link to={`/employer/jobs/${job.id}/edit`}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(job.id)}
-                      className="w-full text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
+                    {!isCompanyUser && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="w-full"
+                        >
+                          <Link to={`/employer/jobs/${job.id}/edit`}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(job.id)}
+                          className="w-full text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>

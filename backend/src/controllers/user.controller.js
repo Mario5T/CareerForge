@@ -216,3 +216,22 @@ exports.updateProfile=async(req,res)=>{
     });
   }
 };
+
+exports.getUserPublic = async (req, res) => {
+  try{
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      include: {
+        experience: { orderBy: { startDate: 'desc' } },
+        education: { orderBy: { startYear: 'desc' } },
+      },
+    });
+    if(!user){
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const { password, email, phone, resume, resumeOriginalName, googleId, provider, ...publicUser } = user;
+    res.json(publicUser);
+  }catch(err){
+    res.status(500).json({message:"Server error"});
+  }
+};

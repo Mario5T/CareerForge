@@ -407,7 +407,7 @@ const CompanyRecruiters = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/profile/${employer.user.id}`)}
+                      onClick={() => navigate(`/profiles/${employer.user.id}`)}
                       className="w-full"
                     >
                       View Profile

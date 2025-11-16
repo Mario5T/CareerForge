@@ -5,8 +5,10 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Search, Building2, MapPin, Star, Clock, ArrowRight } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 const Companies = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -319,7 +321,9 @@ const Companies = () => {
             Join thousands of companies hiring the best talent on our platform. Create your company profile today and start connecting with qualified candidates.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg">Post a Job</Button>
+            {(!user || user.role !== 'COMPANY') && (
+              <Button size="lg">Post a Job</Button>
+            )}
             <Button variant="outline" size="lg">Learn More</Button>
           </div>
         </CardContent>

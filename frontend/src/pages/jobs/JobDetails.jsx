@@ -66,7 +66,7 @@ const extractTechSkills = (requirements = []) => {
 
 const JobDetails = () => {
   const { id } = useParams();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
@@ -77,6 +77,7 @@ const JobDetails = () => {
   const { toast } = useToast();
 
   const techSkills = job?.requirements ? extractTechSkills(job.requirements) : [];
+  const isCompanyUser = user?.role === 'COMPANY';
 
 
   useEffect(() => {
@@ -250,39 +251,41 @@ const JobDetails = () => {
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="flex-1 md:flex-none"
-              onClick={toggleSaveJob}
-              disabled={saving}
-            >
-              {saving ? (
-                'Saving...'
-              ) : (
-                <>
-                  <Bookmark className={`h-4 w-4 mr-2 ${isSaved ? 'fill-current' : ''}`} />
-                  {isSaved ? 'Saved' : 'Save Job'}
-                </>
-              )}
-            </Button>
-            <Button 
-              size="lg" 
-              className="flex-1 md:flex-none"
-              onClick={handleApply}
-              disabled={applying}
-            >
-              {applying ? (
-                'Applying...'
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Apply Now
-                </>
-              )}
-            </Button>
-          </div>
+          {!isCompanyUser && (
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="flex-1 md:flex-none"
+                onClick={toggleSaveJob}
+                disabled={saving}
+              >
+                {saving ? (
+                  'Saving...'
+                ) : (
+                  <>
+                    <Bookmark className={`h-4 w-4 mr-2 ${isSaved ? 'fill-current' : ''}`} />
+                    {isSaved ? 'Saved' : 'Save Job'}
+                  </>
+                )}
+              </Button>
+              <Button 
+                size="lg" 
+                className="flex-1 md:flex-none"
+                onClick={handleApply}
+                disabled={applying}
+              >
+                {applying ? (
+                  'Applying...'
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Apply Now
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

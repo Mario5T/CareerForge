@@ -21,12 +21,15 @@
 
 const express=require('express');
 const router=express.Router();
-const {registerUser,loginUser,getProfile,updateProfile}=require('../controllers/user.controller');
+const {registerUser,loginUser,getProfile,updateProfile,getUserPublic}=require('../controllers/user.controller');
 const {protect}=require('../middlewares/auth.middleware');
 
 router.post('/register',registerUser);
 router.post('/login',loginUser);
 router.get('/profile',protect,getProfile);
 router.put('/profile',protect,updateProfile);
+
+// Public user profile by ID (must be after '/profile' to avoid conflicts)
+router.get('/:id', getUserPublic);
 
 module.exports=router;

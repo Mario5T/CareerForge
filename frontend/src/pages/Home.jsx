@@ -198,12 +198,7 @@ const Home = () => {
                 </Link>
               </Button>
               
-              <Button asChild variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
-                <Link to="/company/jobs">
-                  <Briefcase className="h-6 w-6" />
-                  <span>Post a Job</span>
-                </Link>
-              </Button>
+              {/* Post a Job button removed for COMPANY role */}
               
               <Button asChild variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
                 <Link to="/company/recruiters">
@@ -242,16 +237,7 @@ const Home = () => {
                 </Button>
               </div>
               
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-orange-500" />
-                <div className="flex-1">
-                  <p className="font-medium">Post your first job</p>
-                  <p className="text-sm text-gray-600">Start attracting top talent</p>
-                </div>
-                <Button asChild size="sm" variant="outline">
-                  <Link to="/company/jobs">Post Job</Link>
-                </Button>
-              </div>
+              {/* Post your first job checklist item removed for COMPANY role */}
               
               <div className="flex items-center gap-3">
                 <AlertCircle className="h-5 w-5 text-orange-500" />
@@ -303,7 +289,7 @@ const Home = () => {
           <Button asChild>
             <Link to="/jobs">Find Jobs</Link>
           </Button>
-          {(!user || user?.role === 'COMPANY' || user?.role === 'EMPLOYER') && (
+          {(!user || user?.role === 'RECRUITER') && (
             <Button variant="outline" asChild>
               <Link to="/employer/post-job">Post a Job</Link>
             </Button>

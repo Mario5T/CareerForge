@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -13,7 +13,6 @@ import {
   TrendingUp, AlertCircle, UserCheck
 } from 'lucide-react';
 import companyService from '../../services/company.service';
-import employerService from '../../services/employer.service';
 import { selectCurrentUser } from '../../store/slices/auth/authSlice';
 
 const CompanyApplications = () => {
@@ -27,6 +26,7 @@ const CompanyApplications = () => {
   const [jobFilter, setJobFilter] = useState('ALL');
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     if (user?.role !== 'COMPANY') {
@@ -87,6 +87,10 @@ const CompanyApplications = () => {
       allApplications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setApplications(allApplications);
       setFilteredApplications(allApplications);
+      const qpJobId = searchParams.get('jobId');
+      if (qpJobId) {
+        setJobFilter(qpJobId);
+      }
     } catch (error) {
       toast({
         title: 'Error',
@@ -124,28 +128,7 @@ const CompanyApplications = () => {
     setFilteredApplications(filtered);
   };
 
-  const handleStatusChange = async (applicationId, newStatus) => {
-    try {
-      await employerService.updateApplicationStatus(applicationId, newStatus);
-      toast({
-        title: 'Success',
-        description: `Application ${newStatus.toLowerCase()}`,
-      });
-      
-      // Update local state
-      setApplications(prev => 
-        prev.map(app => 
-          app.id === applicationId ? { ...app, status: newStatus } : app
-        )
-      );
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to update application status',
-        variant: 'destructive',
-      });
-    }
-  };
+  
 
   const getStats = () => {
     const total = applications.length;
@@ -418,7 +401,7 @@ const CompanyApplications = () => {
                     <Button
                       variant="default"
                       size="sm"
-                      onClick={() => navigate(`/profile/${application.applicant?.id}`)}
+                      onClick={() => navigate(`/profiles/${application.applicant?.id}`)}
                       className="w-full"
                     >
                       <User className="h-4 w-4 mr-2" />
@@ -437,28 +420,7 @@ const CompanyApplications = () => {
                       </Button>
                     )}
 
-                    {application.status === 'PENDING' && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleStatusChange(application.id, 'ACCEPTED')}
-                          className="w-full text-green-600 hover:text-green-700 hover:bg-green-50"
-                        >
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Accept
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleStatusChange(application.id, 'REJECTED')}
-                          className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Reject
-                        </Button>
-                      </>
-                    )}
+                    
 
                     <Button
                       variant="outline"
