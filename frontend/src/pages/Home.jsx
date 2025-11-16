@@ -1,18 +1,24 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+<<<<<<< HEAD
+=======
 
+>>>>>>> 196baef5e91ac0174416786358d25dbb9a5962b8
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, MapPin, DollarSign } from 'lucide-react';
+import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, MapPin, DollarSign, Edit2, Award, BookOpen } from 'lucide-react';
 import { selectCurrentUser } from '../store/slices/auth/authSlice';
 import companyService from '../services/company.service';
+import api from '../services/api';
 
 const Home = () => {
   const user = useSelector(selectCurrentUser);
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   useEffect(() => {
     const fetchFeaturedJobs = async () => {
@@ -32,6 +38,25 @@ const Home = () => {
 
     fetchFeaturedJobs();
   }, []);
+
+  // Fetch user profile if logged in
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user?.id && user?.role === 'USER') {
+        setLoadingProfile(true);
+        try {
+          const response = await api.get('/users/profile');
+          setUserProfile(response.data);
+        } catch (err) {
+          console.error('Error fetching user profile:', err);
+        } finally {
+          setLoadingProfile(false);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user?.id, user?.role]);
 
   const formatSalary = (min, max, currency = 'USD') => {
     if (!min && !max) return 'Salary not specified';
@@ -282,11 +307,101 @@ const Home = () => {
           <Button asChild>
             <Link to="/jobs">Find Jobs</Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link to="/employer/post-job">Post a Job</Link>
-          </Button>
+          {(!user || user?.role === 'COMPANY' || user?.role === 'EMPLOYER') && (
+            <Button variant="outline" asChild>
+              <Link to="/employer/post-job">Post a Job</Link>
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* User Profile Card - Only for logged in USER role */}
+      {user?.role === 'USER' && userProfile && (
+        <section className="mt-16 mb-12">
+          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-indigo-50">
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                {/* Left side - Profile info */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                      {userProfile.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-slate-900">{userProfile.name || 'User'}</h3>
+                      <p className="text-slate-600">{userProfile.email}</p>
+                      {userProfile.location && (
+                        <div className="flex items-center gap-1 text-slate-600 text-sm mt-1">
+                          <MapPin className="h-4 w-4" />
+                          {userProfile.location}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bio */}
+                  {userProfile.bio && (
+                    <p className="text-slate-700 text-sm mb-4 line-clamp-2">{userProfile.bio}</p>
+                  )}
+
+                  {/* Quick Stats */}
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    {userProfile.skills && userProfile.skills.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-blue-600" />
+                        <span className="text-slate-700"><strong>{userProfile.skills.length}</strong> Skills</span>
+                      </div>
+                    )}
+                    {userProfile.experience && userProfile.experience.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 text-blue-600" />
+                        <span className="text-slate-700"><strong>{userProfile.experience.length}</strong> Experience</span>
+                      </div>
+                    )}
+                    {userProfile.education && userProfile.education.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-blue-600" />
+                        <span className="text-slate-700"><strong>{userProfile.education.length}</strong> Education</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right side - Skills preview and action button */}
+                <div className="flex-shrink-0 w-full md:w-auto">
+                  {/* Skills preview */}
+                  {userProfile.skills && userProfile.skills.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-slate-600 mb-2">Top Skills</p>
+                      <div className="flex flex-wrap gap-2">
+                        {userProfile.skills.slice(0, 3).map((skill, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-white text-blue-700 text-xs font-medium rounded-full border border-blue-200 shadow-sm">
+                            {skill}
+                          </span>
+                        ))}
+                        {userProfile.skills.length > 3 && (
+                          <span className="px-3 py-1 bg-white text-slate-600 text-xs font-medium rounded-full border border-slate-200">
+                            +{userProfile.skills.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Edit Profile Button */}
+                  <Button asChild className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
+                    <Link to="/profile" className="flex items-center gap-2">
+                      <Edit2 className="h-4 w-4" />
+                      Edit Profile
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
       <section className="mt-20">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">Featured Jobs</h2>

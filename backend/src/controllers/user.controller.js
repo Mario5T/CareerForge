@@ -66,7 +66,13 @@ exports.loginUser=async(req,res)=>{
 
 exports.getProfile=async(req,res)=>{
   try{
-    const user=await prisma.user.findUnique({where:{id:req.user.id}});
+    const user=await prisma.user.findUnique({
+      where:{id:req.user.id},
+      include:{
+        experience:{orderBy:{startDate:'desc'}},
+        education:{orderBy:{startYear:'desc'}}
+      }
+    });
     res.json(user);
   }catch(err){
     res.status(500).json({message:"Server error"});
@@ -75,13 +81,134 @@ exports.getProfile=async(req,res)=>{
 
 exports.updateProfile=async(req,res)=>{
   try{
-    const data=req.body;
-    const updated=await prisma.user.update({
-      where:{id:req.user.id},
-      data
+    const { experience, education, ...profileData } = req.body;
+    
+    // Update user profile
+    const updated = await prisma.user.update({
+      where: { id: req.user.id },
+      data: profileData,
     });
-    res.json({message:"Profile updated",user:updated});
+
+    // Handle work experience updates
+    if (experience && Array.isArray(experience)) {
+      const existingExp = await prisma.workExperience.findMany({
+        where: { userId: req.user.id },
+      });
+      const existingIds = new Set(existingExp.map(e => e.id));
+      const incomingIds = new Set(experience.filter(e => e.id).map(e => e.id));
+
+      // Delete removed experiences
+      for (const exp of existingExp) {
+        if (!incomingIds.has(exp.id)) {
+          await prisma.workExperience.delete({ where: { id: exp.id } });
+        }
+      }
+
+      // Create or update experiences
+      for (const exp of experience) {
+        if (exp.id && existingIds.has(exp.id)) {
+          await prisma.workExperience.update({
+            where: { id: exp.id },
+            data: {
+              jobTitle: exp.jobTitle,
+              company: exp.company,
+              location: exp.location,
+              employmentType: exp.employmentType,
+              startDate: exp.startDate,
+              endDate: exp.endDate,
+              currentlyWorking: exp.currentlyWorking,
+              description: exp.description,
+              skillsUsed: exp.skillsUsed || [],
+            },
+          });
+        } else {
+          await prisma.workExperience.create({
+            data: {
+              jobTitle: exp.jobTitle,
+              company: exp.company,
+              location: exp.location,
+              employmentType: exp.employmentType,
+              startDate: exp.startDate,
+              endDate: exp.endDate,
+              currentlyWorking: exp.currentlyWorking,
+              description: exp.description,
+              skillsUsed: exp.skillsUsed || [],
+              userId: req.user.id,
+            },
+          });
+        }
+      }
+    }
+
+    // Handle education updates
+    if (education && Array.isArray(education)) {
+      const existingEdu = await prisma.education.findMany({
+        where: { userId: req.user.id },
+      });
+      const existingIds = new Set(existingEdu.map(e => e.id));
+      const incomingIds = new Set(education.filter(e => e.id).map(e => e.id));
+
+      // Delete removed education
+      for (const edu of existingEdu) {
+        if (!incomingIds.has(edu.id)) {
+          await prisma.education.delete({ where: { id: edu.id } });
+        }
+      }
+
+      // Create or update education
+      for (const edu of education) {
+        if (edu.id && existingIds.has(edu.id)) {
+          await prisma.education.update({
+            where: { id: edu.id },
+            data: {
+              degree: edu.degree,
+              university: edu.university,
+              fieldOfStudy: edu.fieldOfStudy,
+              startYear: parseInt(edu.startYear),
+              endYear: edu.endYear ? parseInt(edu.endYear) : null,
+              isPresent: edu.isPresent,
+              grade: edu.grade,
+              description: edu.description,
+            },
+          });
+        } else {
+          await prisma.education.create({
+            data: {
+              degree: edu.degree,
+              university: edu.university,
+              fieldOfStudy: edu.fieldOfStudy,
+              startYear: parseInt(edu.startYear),
+              endYear: edu.endYear ? parseInt(edu.endYear) : null,
+              isPresent: edu.isPresent,
+              grade: edu.grade,
+              description: edu.description,
+              userId: req.user.id,
+            },
+          });
+        }
+      }
+    }
+
+    // Fetch updated user with all relations
+    const finalUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        experience: {orderBy: { startDate: 'desc' }},
+        education: {orderBy: { startYear: 'desc' }},
+      },
+    });
+
+    res.json({
+      message: "Profile updated successfully",
+      user: finalUser,
+      success: true,
+    });
   }catch(err){
-    res.status(500).json({message:"Server error"});
+    console.error('Profile update error:', err);
+    res.status(500).json({
+      message: "Failed to update profile",
+      error: err.message,
+      success: false,
+    });
   }
 };
