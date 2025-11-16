@@ -21,6 +21,8 @@ import Companies from './pages/companies/Companies';
 import NotFound from './pages/NotFound';
 import PostJob from './pages/employer/PostJob';
 import ManageJobs from './pages/employer/ManageJobs';
+import EmployerHomepage from './pages/employer/Homepaage';
+import EmployerProfile from './pages/employer/EmployerProfile';
 import CompanyProfile from './pages/company/CompanyProfile';
 import CompanyJobs from './pages/company/CompanyJobs';
 import CompanyRecruiters from './pages/company/CompanyRecruiters';
@@ -86,6 +88,22 @@ const router = createBrowserRouter([
       {
         path: 'employer',
         children: [
+          {
+            index: true,
+            element: (
+              <ProtectedRoute>
+                <EmployerHomepage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'profile',
+            element: (
+              <ProtectedRoute>
+                <EmployerProfile />
+              </ProtectedRoute>
+            ),
+          },
           {
             path: 'jobs',
             element: (
