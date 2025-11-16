@@ -32,10 +32,12 @@ model User {
   avatar    String?  // Profile picture from OAuth provider
 
   // Relations
-  employers     Employer[]
-  jobsCreated   Job[]        @relation("JobCreator")
-  applications  Application[]
+  employers      Employer[]
+  jobsCreated    Job[]        @relation("JobCreator")
+  applications   Application[]
   ownedCompanies Company[]    @relation("CompanyOwner")
+  experience     WorkExperience[]
+  education      Education[]
 
   @@index([email])
   @@index([googleId])
@@ -133,6 +135,49 @@ model Application {
   @@index([applicantId])
   @@index([jobId])
   @@index([status])
+}
+
+model WorkExperience {
+  id                String   @id @default(uuid())
+  jobTitle          String
+  company           String
+  location          String?
+  employmentType    String   @default("Full-time")
+  startDate         String   // Format: YYYY-MM
+  endDate           String?  // Format: YYYY-MM
+  currentlyWorking  Boolean  @default(false)
+  description       String?
+  skillsUsed        String[]
+  certificate       String?  // URL to certificate file
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Education {
+  id                String   @id @default(uuid())
+  degree            String
+  university        String
+  fieldOfStudy      String?
+  startYear         Int
+  endYear           Int?
+  isPresent         Boolean  @default(false)
+  grade             String?  // CGPA or percentage
+  description       String?
+  certificate       String?  // URL to certificate file
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // Enums
