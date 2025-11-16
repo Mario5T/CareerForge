@@ -88,6 +88,11 @@ const Navbar = () => {
                 <li><Link to="/company/recruiters" className="hover:text-[#6A38C2] transition-colors">Recruiters</Link></li>
                 <li><Link to="/company/applications" className="hover:text-[#6A38C2] transition-colors">Applications</Link></li>
               </>
+            ) : user?.role === 'RECRUITER' ? (
+              <>
+                <li><Link to="/employer" className="hover:text-[#6A38C2] transition-colors">Dashboard</Link></li>
+                <li><Link to="/employer/jobs" className="hover:text-[#6A38C2] transition-colors">Manage Jobs</Link></li>
+              </>
             ) : (
               <>
                 <li><Link to="/jobs" className="hover:text-[#6A38C2] transition-colors">Jobs</Link></li>

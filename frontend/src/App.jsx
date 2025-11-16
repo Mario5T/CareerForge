@@ -23,6 +23,8 @@ import PostJob from './pages/employer/PostJob';
 import ManageJobs from './pages/employer/ManageJobs';
 import EmployerHomepage from './pages/employer/Homepaage';
 import EmployerProfile from './pages/employer/EmployerProfile';
+import JobApplicants from './pages/employer/JobApplicants';
+import EditJob from './pages/employer/EditJob';
 import CompanyProfile from './pages/company/CompanyProfile';
 import CompanyJobs from './pages/company/CompanyJobs';
 import CompanyRecruiters from './pages/company/CompanyRecruiters';
@@ -120,6 +122,22 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute>
                 <PostJob />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'jobs/:jobId/applicants',
+            element: (
+              <ProtectedRoute>
+                <JobApplicants />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'jobs/:jobId/edit',
+            element: (
+              <ProtectedRoute>
+                <EditJob />
               </ProtectedRoute>
             ),
           },
