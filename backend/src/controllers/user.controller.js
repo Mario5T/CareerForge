@@ -66,6 +66,9 @@ exports.loginUser=async(req,res)=>{
 
 exports.getProfile=async(req,res)=>{
   try{
+    if(!req.user){
+      return res.status(401).json({message:"Not authorized"});
+    }
     const user=await prisma.user.findUnique({
       where:{id:req.user.id},
       include:{
@@ -73,7 +76,8 @@ exports.getProfile=async(req,res)=>{
         education:{orderBy:{startYear:'desc'}}
       }
     });
-    res.json(user);
+    const { password: _password, ...userWithoutPassword } = user || {};
+    res.json(userWithoutPassword);
   }catch(err){
     res.status(500).json({message:"Server error"});
   }

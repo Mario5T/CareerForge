@@ -25,10 +25,48 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import jobService from '../../services/job.service';
+import { PREDEFINED_SKILLS } from '../../constants/skills';
+const normalize = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const TECH_STACK_SUBSTRINGS = [
+  'js','javascript','typescript','react','redux','next','nuxt','vue','angular','svelte',
+  'node','express','nest','koa','hapi','fastify','django','flask','fastapi','spring',
+  'rails','laravel','symfony','phoenix','go','golang','rust','csharp','cpp','swift','kotlin','dart',
+  'reactnative','flutter','android','ios',
+  'postgres','mysql','sqlite','mongodb','mariadb','redis','prisma','sequelize','typeorm','mongoose',
+  'graphql','rest','grpc','websocket',
+  'docker','kubernetes','terraform','ansible','jenkins','github','gitlab','cicd','nginx','apache',
+  'aws','azure','gcp','googlecloud','vercel','netlify',
+  'webpack','vite','babel','tailwind','bootstrap','material','chakra','antd','sass','less','postcss',
+  'jest','vitest','mocha','chai','cypress','playwright','selenium','puppeteer','rtl',
+  'kafka','rabbitmq','sqs','sns','pubsub','elasticsearch','kibana','logstash',
+  'figma','adobe','photoshop','illustrator','sketch','jira','confluence'
+];
+
+const isTechStackSkill = (skill) => {
+  const ns = normalize(skill);
+  if (ns.length < 3) return TECH_STACK_SUBSTRINGS.some(k => ns === k);
+  return TECH_STACK_SUBSTRINGS.some(k => ns.includes(k));
+};
+
+const extractTechSkills = (requirements = []) => {
+  const found = new Set();
+  const normalizedReqs = requirements.map(r => normalize(r));
+  const skills = PREDEFINED_SKILLS.map(s => ({ raw: s, norm: normalize(s) }))
+    .filter(s => s.norm.length >= 2 && isTechStackSkill(s.raw));
+
+  for (const req of normalizedReqs) {
+    for (const sk of skills) {
+      if (sk.norm && sk.norm.length >= 3 && req.includes(sk.norm)) {
+        found.add(sk.raw);
+      }
+    }
+  }
+  return Array.from(found).sort((a, b) => a.localeCompare(b)).slice(0, 20);
+};
 
 const JobDetails = () => {
   const { id } = useParams();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
@@ -37,6 +75,8 @@ const JobDetails = () => {
   const [relatedJobs, setRelatedJobs] = useState([]);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const techSkills = job?.requirements ? extractTechSkills(job.requirements) : [];
 
 
   useEffect(() => {
@@ -420,16 +460,16 @@ const JobDetails = () => {
             </CardContent>
           </Card>
           
-          {job.requirements && job.requirements.length > 0 && (
+          {techSkills.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Required Skills</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {job.requirements.map((req, index) => (
+                  {techSkills.map((skill, index) => (
                     <Badge key={index} variant="secondary" className="px-3 py-1">
-                      {req}
+                      {skill}
                     </Badge>
                   ))}
                 </div>

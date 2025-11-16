@@ -12,7 +12,11 @@ exports.protect=async(req,res,next)=>{
   const token=authHeader.split(' ')[1];
   try{
     const decoded=jwt.verify(token,JWT_SECRET);
-    req.user=await prisma.user.findUnique({where:{id:decoded.id}});
+    const user=await prisma.user.findUnique({where:{id:decoded.id}});
+    if(!user){
+      return res.status(401).json({message:"Not authorized"});
+    }
+    req.user=user;
     next();
   }catch(err){
     res.status(401).json({message:"Token failed"});

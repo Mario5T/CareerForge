@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
@@ -32,13 +32,16 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const AuthInitializer = ({ children }) => {
   const dispatch = useDispatch();
+  const initRef = useRef(false);
 
   useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
     const token = localStorage.getItem('token');
     if (token) {
       dispatch(checkAuth());
     }
-  }, [dispatch]);
+  }, []);
 
   return children;
 };
