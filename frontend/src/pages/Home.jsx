@@ -7,6 +7,7 @@ import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, Map
 import { selectCurrentUser } from '../store/slices/auth/authSlice';
 import companyService from '../services/company.service';
 import api from '../services/api';
+ 
 
 const Home = () => {
   const user = useSelector(selectCurrentUser);
@@ -15,6 +16,7 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+ 
 
   useEffect(() => {
     const fetchFeaturedJobs = async () => {
@@ -269,21 +271,7 @@ const Home = () => {
           we've got you covered.
         </p>
         
-        {/* Search Bar */}
-        <div className="mt-8 max-w-2xl mx-auto">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search for jobs, companies, or skills..."
-              className="w-full px-6 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-            />
-            <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </div>
-        </div>
+ 
 
         <div className="mt-10 flex justify-center gap-4">
           <Button asChild>

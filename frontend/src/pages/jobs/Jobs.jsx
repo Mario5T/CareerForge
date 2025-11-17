@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
@@ -7,12 +7,16 @@ import { Badge } from '../../components/ui/badge';
 import { Search, MapPin, Briefcase, Clock, DollarSign, Building2, ArrowRight } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import jobService from '../../services/job.service';
+import SearchBar from '../../components/SearchBar';
+import useDebounce from '../../hooks/useDebounce';
 
 const Jobs = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
+  const [inputValue, setInputValue] = useState(searchParams.get('q') || '');
+  const debouncedSearchTerm = useDebounce(inputValue, 300);
   const [filters, setFilters] = useState({
     location: searchParams.get('location') || '',
     jobType: searchParams.get('type') || '',
@@ -23,20 +27,23 @@ const Jobs = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchJobs = async (isFirst) => {
       try {
-        setLoading(true);
-        
+        if (isFirst) {
+          setInitialLoading(true);
+        } else {
+          setFetching(true);
+        }
+
         // Build query params for backend filtering
         const params = {};
-        if (searchTerm) params.search = searchTerm;
+        if (debouncedSearchTerm) params.search = debouncedSearchTerm;
         if (filters.location) params.location = filters.location;
         if (filters.jobType) params.jobType = filters.jobType;
         if (filters.experience) params.experienceLevel = filters.experience;
-        
+
         const response = await jobService.getAllJobs(params);
         setJobs(response.data || []);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching jobs:', error);
         toast({
@@ -44,40 +51,54 @@ const Jobs = () => {
           description: error.response?.data?.error || error.message || 'Failed to load jobs. Please try again later.',
           variant: 'destructive',
         });
-        setLoading(false);
+      } finally {
+        setInitialLoading(false);
+        setFetching(false);
       }
     };
 
-    fetchJobs();
+    // Determine if this is the first load
+    const isFirst = initialLoading;
+    fetchJobs(isFirst);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, filters.location, filters.jobType, filters.experience]);
+  }, [debouncedSearchTerm, filters.location, filters.jobType, filters.experience]);
 
-  const handleSearch = (e) => {
+  const handleSearch = useCallback((e) => {
     e.preventDefault();
     setSearchParams({
-      q: searchTerm,
+      q: debouncedSearchTerm,
       ...filters,
     });
-  };
+  }, [debouncedSearchTerm, filters, setSearchParams]);
 
-  const handleFilterChange = (e) => {
+  const handleFilterChange = useCallback((e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  // Get current jobs for pagination
-  const indexOfLastJob = currentPage * jobsPerPage;
-  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
-  const currentJobs = jobs.slice(indexOfFirstJob, indexOfLastJob);
-  const totalPages = Math.ceil(jobs.length / jobsPerPage);
+  const handleInputChange = useCallback((e) => {
+    setInputValue(e.target.value);
+  }, []);
 
-  // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  // Memoize pagination calculations to prevent unnecessary recalculations
+  const paginationData = useMemo(() => {
+    const indexOfLastJob = currentPage * jobsPerPage;
+    const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+    const currentJobs = jobs.slice(indexOfFirstJob, indexOfLastJob);
+    const totalPages = Math.ceil(jobs.length / jobsPerPage);
+    return { indexOfLastJob, indexOfFirstJob, currentJobs, totalPages };
+  }, [jobs, currentPage]);
 
-  if (loading) {
+  const { currentJobs, totalPages } = paginationData;
+
+  const paginate = useCallback((pageNumber) => {
+    setCurrentPage(pageNumber);
+  }, []);
+
+  if (initialLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -97,17 +118,14 @@ const Jobs = () => {
         <CardContent className="pt-6">
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
+              <SearchBar
+                value={inputValue}
+                onChange={handleInputChange}
+                placeholder="Job title, company, or keywords"
+                className="flex-1"
+              />
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Job title, company, or keywords"
-                  className="pl-10 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <div className="flex-1">
+                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   name="location"
                   placeholder="Location"
@@ -115,7 +133,6 @@ const Jobs = () => {
                   value={filters.location}
                   onChange={handleFilterChange}
                 />
-                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
               <Button type="submit" className="w-full md:w-auto">
                 <Search className="mr-2 h-4 w-4" />
@@ -155,7 +172,11 @@ const Jobs = () => {
 
       {/* Job Listings */}
       <div className="space-y-4">
-        {currentJobs.length > 0 ? (
+        {fetching ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        ) : currentJobs.length > 0 ? (
           currentJobs.map((job) => (
             <Card key={job.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">

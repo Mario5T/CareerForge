@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Search, Building2, MapPin, Star, Clock, ArrowRight } from 'lucide-react';
+import { Card, CardContent } from '../../components/ui/card';
+import { Building2, MapPin, Search } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import SearchBar from '../../components/SearchBar';
+import useDebounce from '../../hooks/useDebounce';
+import CompanyCard from '../../components/CompanyCard';
 
 const Companies = () => {
   const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const debouncedSearchTerm = useDebounce(inputValue, 300);
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -68,54 +70,66 @@ const Companies = () => {
     },
   ];
 
+  // ✅ useMemo for expensive filtering operations (derived from current data)
+  const filteredCompanies = useMemo(() => {
+    return companies.filter(company => {
+      const matchesSearch = !debouncedSearchTerm || 
+        company.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        company.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        company.industry.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      
+      const matchesLocation = !filters.location || 
+                           company.location.toLowerCase().includes(filters.location.toLowerCase());
+      
+      const matchesIndustry = !filters.industry || 
+                           company.industry.toLowerCase() === filters.industry.toLowerCase();
+      
+      const matchesSize = !filters.size || 
+                       company.size === filters.size;
+      
+      return matchesSearch && matchesLocation && matchesIndustry && matchesSize;
+    });
+  }, [companies, debouncedSearchTerm, filters]);
+
+  // Fetch once on mount (simulated). Do NOT toggle loading on each keystroke.
   useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        setLoading(true);
-        setTimeout(() => {
-          const filteredCompanies = mockCompanies.filter(company => {
-            const matchesSearch = company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                               company.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                               company.industry.toLowerCase().includes(searchTerm.toLowerCase());
-            
-            const matchesLocation = !filters.location || 
-                                 company.location.toLowerCase().includes(filters.location.toLowerCase());
-            
-            const matchesIndustry = !filters.industry || 
-                                 company.industry.toLowerCase() === filters.industry.toLowerCase();
-            
-            const matchesSize = !filters.size || 
-                             company.size === filters.size;
-            
-            return matchesSearch && matchesLocation && matchesIndustry && matchesSize;
-          });
-          
-          setCompanies(filteredCompanies);
-          setLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error('Error fetching companies:', error);
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setCompanies(mockCompanies);
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
-    fetchCompanies();
-  }, [searchTerm, filters]);
-
-  const handleFilterChange = (e) => {
+  // ✅ useCallback for event handlers
+  const handleFilterChange = useCallback((e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handleSearch = (e) => {
+  const handleSearch = useCallback((e) => {
     e.preventDefault();
-  };
+  }, []);
 
-  const industries = [...new Set(mockCompanies.map(company => company.industry))];
-  const companySizes = [...new Set(mockCompanies.map(company => company.size))];
+  const handleInputChange = useCallback((e) => {
+    setInputValue(e.target.value);
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    setInputValue('');
+    setFilters({
+      location: '',
+      industry: '',
+      size: ''
+    });
+  }, []);
+
+  // ✅ useMemo for static arrays to prevent recreation
+  const industries = useMemo(() => [...new Set(mockCompanies.map(company => company.industry))], []);
+  const companySizes = useMemo(() => [...new Set(mockCompanies.map(company => company.size))], []);
 
   if (loading) {
     return (
@@ -139,17 +153,14 @@ const Companies = () => {
         <CardContent className="pt-6">
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
+              <SearchBar
+                value={inputValue}
+                onChange={handleInputChange}
+                placeholder="Search companies..."
+                className="flex-1"
+              />
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search companies..."
-                  className="pl-10 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <div className="flex-1">
+                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   name="location"
                   placeholder="Location"
@@ -157,7 +168,6 @@ const Companies = () => {
                   value={filters.location}
                   onChange={handleFilterChange}
                 />
-                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
               <Button type="submit" className="w-full md:w-auto">
                 <Search className="mr-2 h-4 w-4" />
@@ -197,14 +207,7 @@ const Companies = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => {
-                  setSearchTerm('');
-                  setFilters({
-                    location: '',
-                    industry: '',
-                    size: ''
-                  });
-                }}
+                onClick={handleClearFilters}
               >
                 Clear Filters
               </Button>
@@ -213,62 +216,12 @@ const Companies = () => {
         </CardContent>
       </Card>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {companies.length > 0 ? (
-          companies.map((company) => (
-            <Card key={company.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <Building2 className="h-8 w-8 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">
-                      <Link to={`/companies/${company.id}`} className="hover:underline">
-                        {company.name}
-                      </Link>
-                    </h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" />
-                      <span>{company.location}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {company.description}
-                </p>
-                
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline" className="text-xs">
-                    {company.industry}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {company.size} employees
-                  </Badge>
-                  {company.isHiring && (
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100 text-xs">
-                      Hiring Now
-                    </Badge>
-                  )}
-                </div>
-                
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 mr-1" />
-                    <span className="font-medium">{company.rating}</span>
-                    <span className="text-muted-foreground ml-1">
-                      ({company.jobs} {company.jobs === 1 ? 'job' : 'jobs'})
-                    </span>
-                  </div>
-                  
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to={`/companies/${company.id}`}>
-                      View Details <ArrowRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+        {filteredCompanies.length > 0 ? (
+          filteredCompanies.map((company) => (
+            <CompanyCard 
+              key={company.id} 
+              company={company} 
+            />
           ))
         ) : (
           <div className="col-span-full text-center py-12">
@@ -282,14 +235,7 @@ const Companies = () => {
             <Button 
               variant="ghost" 
               className="mt-4"
-              onClick={() => {
-                setSearchTerm('');
-                setFilters({
-                  location: '',
-                  industry: '',
-                  size: ''
-                });
-              }}
+              onClick={handleClearFilters}
             >
               Clear all filters
             </Button>
@@ -297,11 +243,11 @@ const Companies = () => {
         )}
       </div>
     
-      {companies.length > 0 && (
+      {filteredCompanies.length > 0 && (
         <div className="mt-16">
           <h2 className="text-2xl font-bold mb-6">Featured Companies</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {companies.slice(0, 6).map((company) => (
+            {filteredCompanies.slice(0, 6).map((company) => (
               <Card key={`featured-${company.id}`} className="text-center p-4 hover:shadow-md transition-shadow">
                 <div className="bg-primary/10 p-3 rounded-lg inline-block mb-3">
                   <Building2 className="h-8 w-8 text-primary" />
