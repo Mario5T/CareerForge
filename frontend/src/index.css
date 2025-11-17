@@ -3,6 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --radius: 1.25rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -23,6 +24,27 @@
   --input: oklch(0 0 0 / 15%);
   --ring: oklch(0.556 0 0);
 }
+
+/* Chat sphere glow */
+.chat-sphere-glow {
+  position: relative;
+}
+.chat-sphere-glow::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: radial-gradient(ellipse at center, rgba(99,102,241,0.35), rgba(168,85,247,0.15) 45%, transparent 70%);
+  filter: blur(8px);
+  opacity: 0.8;
+  transition: opacity 200ms ease, transform 200ms ease;
+  pointer-events: none;
+}
+.chat-sphere-glow:hover::before {
+  opacity: 1;
+  transform: scale(1.03);
+}
+
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
