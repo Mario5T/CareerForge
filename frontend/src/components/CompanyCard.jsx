@@ -7,10 +7,10 @@ import { Building2, MapPin, Star, ArrowRight } from 'lucide-react';
 
 const CompanyCard = React.memo(({ company }) => {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="group animate-in fade-in-0 slide-in-from-bottom-2 duration-300 hover:shadow-lg transition-all hover:-translate-y-0.5">
       <CardContent className="p-6">
         <div className="flex items-start gap-4 mb-4">
-          <div className="bg-primary/10 p-3 rounded-lg">
+          <div className="bg-primary/10 p-3 rounded-lg transition-transform duration-300 group-hover:scale-105">
             <Building2 className="h-8 w-8 text-primary" />
           </div>
           <div>
@@ -55,7 +55,7 @@ const CompanyCard = React.memo(({ company }) => {
           
           <Button variant="outline" size="sm" asChild>
             <Link to={`/companies/${company.id}`}>
-              View Details <ArrowRight className="ml-1 h-4 w-4" />
+              View Details <ArrowRight className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </Button>
         </div>

@@ -107,14 +107,14 @@ const Jobs = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 animate-in fade-in-0 duration-300">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Find Your Dream Job</h1>
         <p className="text-muted-foreground">Browse through thousands of full-time and part-time jobs near you</p>
       </div>
 
       {/* Search and Filters */}
-      <Card className="mb-8">
+      <Card className="mb-8 animate-in fade-in-0 slide-in-from-top-2 duration-300">
         <CardContent className="pt-6">
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
@@ -178,11 +178,11 @@ const Jobs = () => {
           </div>
         ) : currentJobs.length > 0 ? (
           currentJobs.map((job) => (
-            <Card key={job.id} className="hover:shadow-md transition-shadow">
+            <Card key={job.id} className="group animate-in fade-in-0 slide-in-from-bottom-2 duration-300 hover:shadow-lg transition-all hover:-translate-y-0.5">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 p-3 rounded-lg">
+                    <div className="bg-primary/10 p-3 rounded-lg transition-transform duration-300 group-hover:scale-105">
                       <Building2 className="h-6 w-6 text-primary" />
                     </div>
                     <div>
@@ -234,7 +234,7 @@ const Jobs = () => {
                   <div className="flex-shrink-0">
                     <Button asChild>
                       <Link to={`/jobs/${job.id}`}>
-                        View Details <ArrowRight className="ml-2 h-4 w-4" />
+                        View Details <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                       </Link>
                     </Button>
                   </div>

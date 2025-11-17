@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { LogOut, User2, Building2, Briefcase, Users } from "lucide-react";
 import { logout, selectCurrentUser, selectIsAuthenticated } from "../../store/slices/auth/authSlice";
 import companyService from "../../services/company.service";
+import ThemeToggle from "../ThemeToggle";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ const Navbar = () => {
     return user?.avatar || "https://github.com/shadcn.png";
   };
   return (
-    <div className="bg-white">
+    <div className="bg-background">
       <div className="flex items-center justify-between mx-auto max-w-7xl h-16">
         <div>
           <Link to="/">
@@ -100,6 +101,7 @@ const Navbar = () => {
               </>
             )}
           </ul>
+          <ThemeToggle />
           {!isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Link to="/auth/login"><Button variant="outline">Login</Button></Link>
@@ -108,7 +110,7 @@ const Navbar = () => {
           ) : (
             <Popover>
               <PopoverTrigger asChild>
-                <div className="cursor-pointer w-12 h-12 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-[#6A38C2] transition-colors">
+                <div className="cursor-pointer w-12 h-12 rounded-lg overflow-hidden border-2 border-border hover:border-[#6A38C2] transition-colors">
                   <img
                     src={getAvatarSrc()}
                     alt={user?.name || "User"}
@@ -119,7 +121,7 @@ const Navbar = () => {
               <PopoverContent className="w-80">
                 <div className="">
                   <div className="flex gap-4 space-y-2">
-                    <div className="w-14 h-14 rounded-lg overflow-hidden border-2 border-gray-200 shrink-0">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden border-2 border-border shrink-0">
                       <img
                         src={getAvatarSrc()}
                         alt={user?.name || "User"}

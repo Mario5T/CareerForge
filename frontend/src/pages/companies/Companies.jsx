@@ -140,7 +140,7 @@ const Companies = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 animate-in fade-in-0 duration-300">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Top Companies</h1>
         <p className="text-muted-foreground">
@@ -149,7 +149,7 @@ const Companies = () => {
       </div>
 
       {/* Search and Filters */}
-      <Card className="mb-8">
+      <Card className="mb-8 animate-in fade-in-0 slide-in-from-top-2 duration-300">
         <CardContent className="pt-6">
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
@@ -248,8 +248,8 @@ const Companies = () => {
           <h2 className="text-2xl font-bold mb-6">Featured Companies</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {filteredCompanies.slice(0, 6).map((company) => (
-              <Card key={`featured-${company.id}`} className="text-center p-4 hover:shadow-md transition-shadow">
-                <div className="bg-primary/10 p-3 rounded-lg inline-block mb-3">
+              <Card key={`featured-${company.id}`} className="group text-center p-4 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 hover:shadow-lg transition-all hover:-translate-y-0.5">
+                <div className="bg-primary/10 p-3 rounded-lg inline-block mb-3 transition-transform duration-300 group-hover:scale-105">
                   <Building2 className="h-8 w-8 text-primary" />
                 </div>
                 <h4 className="font-medium">{company.name}</h4>
@@ -260,7 +260,7 @@ const Companies = () => {
         </div>
       )}
       
-      <Card className="mt-16 bg-gradient-to-r from-primary/10 to-primary/5">
+      <Card className="mt-16 bg-gradient-to-r from-primary/10 to-primary/5 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 hover:shadow-md transition-shadow">
         <CardContent className="p-8 text-center">
           <h2 className="text-2xl font-bold mb-2">Want to list your company?</h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">

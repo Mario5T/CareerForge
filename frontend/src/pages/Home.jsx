@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, MapPin, DollarSign, Edit2, Award, BookOpen } from 'lucide-react';
+import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, AlertCircle, MapPin, DollarSign, Edit2, Award, BookOpen, ArrowRight } from 'lucide-react';
 import { selectCurrentUser } from '../store/slices/auth/authSlice';
 import companyService from '../services/company.service';
 import api from '../services/api';
@@ -260,7 +260,7 @@ const Home = () => {
 
   // Regular Home Page for non-company users
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 animate-in fade-in-0 duration-300">
       <div className="text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
           Find Your Dream Job or Top Talent
@@ -287,7 +287,7 @@ const Home = () => {
 
       {/* User Profile Card - Only for logged in USER role */}
       {user?.role === 'USER' && userProfile && (
-        <section className="mt-16 mb-12">
+        <section className="mt-16 mb-12 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
           <Card className="border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-indigo-50">
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -409,34 +409,35 @@ const Home = () => {
                 <Link 
                   key={job.id} 
                   to={`/jobs/${job.id}`}
-                  className="block border rounded-lg p-6 hover:shadow-md transition-shadow hover:border-blue-200"
+                  className="group block rounded-lg border border-border bg-card p-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:ring-2 hover:ring-ring/20 hover:bg-accent/5"
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-semibold text-lg">{job.title}</h3>
-                      <p className="text-gray-600 mt-1">
+                      <p className="text-muted-foreground mt-1">
                         {job.company?.name || 'Company'}
                       </p>
                     </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 translate-x-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1" />
                   </div>
                   
                   <div className="mt-4 space-y-2">
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4 mr-2" />
                       <span>{job.location}</span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <DollarSign className="h-4 w-4 mr-2" />
                       <span>{formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency)}</span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <Briefcase className="h-4 w-4 mr-2" />
                       <span className="capitalize">{job.jobType.toLowerCase().replace('_', ' ')}</span>
                     </div>
                   </div>
                   
                   <div className="mt-4 pt-4 border-t">
-                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                    <span className="px-2 py-1 text-xs rounded-full bg-secondary text-secondary-foreground">
                       {job.experienceLevel}
                     </span>
                   </div>
@@ -467,7 +468,7 @@ const Home = () => {
               description: 'Apply to jobs with one click or post your own job listing.'
             }
           ].map((step, index) => (
-            <div key={index} className="text-center p-6 border rounded-lg">
+            <div key={index} className="text-center p-6 border rounded-lg animate-in fade-in-0 slide-in-from-bottom-2 duration-300 hover:shadow-md transition-all hover:-translate-y-0.5">
               <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 {index + 1}
               </div>
