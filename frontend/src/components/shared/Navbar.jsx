@@ -68,8 +68,8 @@ const Navbar = () => {
     return user?.avatar || "https://github.com/shadcn.png";
   };
   return (
-    <div className="bg-background">
-      <div className="flex items-center justify-between mx-auto max-w-7xl h-16">
+    <div className="fixed top-0 inset-x-0 z-50 bg-background/80 supports-[backdrop-filter]:bg-background/60 backdrop-blur border-b border-border">
+      <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4">
         <div>
           <Link to="/">
             <h1 className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity">
@@ -103,9 +103,9 @@ const Navbar = () => {
           </ul>
           <ThemeToggle />
           {!isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <Link to="/auth/login"><Button variant="outline">Login</Button></Link>
-              <Link to="/auth/register"><Button className="bg-[#6A38C2] hover:bg-[#5b30a6]">Signup</Button></Link>
+            <div className="flex items-center gap-4">
+              <Link to="/auth/login" className="text-sm font-medium hover:text-[#6A38C2] transition-colors">Login</Link>
+              <Link to="/auth/register" className="text-sm font-medium text-[#6A38C2] hover:text-[#5b30a6] transition-colors">Signup</Link>
             </div>
           ) : (
             <Popover>

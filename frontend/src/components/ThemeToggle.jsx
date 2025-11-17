@@ -45,11 +45,11 @@ export default function ThemeToggle() {
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="icon"
       aria-label="Toggle theme"
       onClick={toggle}
-      className="transition-colors"
+      className="transition-colors hover:bg-transparent"
     >
       {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
     </Button>
