@@ -12,6 +12,7 @@ const companyRoutes = require('./routes/company.routes');
 const employerRoutes = require('./routes/employer.routes');
 const jobRoutes = require('./routes/job.routes');
 const authRoutes = require('./routes/auth.routes');
+const chatbotRoutes = require('./routes/chatbot.routes');
 
 const app = express();
 
@@ -45,7 +46,6 @@ if (NODE_ENV === 'production') {
 }
 
 app.use(cors(corsOptions));
-
 
 app.use(
   session({
@@ -85,6 +85,7 @@ app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/employer', employerRoutes);
 app.use('/api/v1/jobs', jobRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/chatbot', chatbotRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

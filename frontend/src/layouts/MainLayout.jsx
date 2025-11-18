@@ -9,13 +9,13 @@ import ChatWidget from '../components/chatbot/ChatWidget';
 import ChatWindow from '../components/chatbot/ChatWindow';
 
 const MainLayout = () => {
+  // Always call hooks unconditionally and in the same order
+  const [chatOpen, setChatOpen] = useState(false);
   const { isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingSpinner fullScreen />;
   }
-
-  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col">
