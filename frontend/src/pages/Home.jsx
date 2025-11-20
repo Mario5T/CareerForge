@@ -16,6 +16,8 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [recommendedJobs, setRecommendedJobs] = useState([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
  
 
   useEffect(() => {
@@ -56,6 +58,40 @@ const Home = () => {
     fetchUserProfile();
   }, [user?.id, user?.role]);
 
+  // Fetch and calculate recommended jobs based on user skills
+  useEffect(() => {
+    const fetchRecommendedJobs = async () => {
+      if (user?.id && user?.role === 'USER' && userProfile?.skills && userProfile.skills.length > 0) {
+        setLoadingRecommended(true);
+        try {
+          const response = await fetch('http://localhost:5001/api/v1/jobs');
+          if (!response.ok) throw new Error('Failed to fetch jobs');
+          const data = await response.json();
+          
+          // Calculate match score for each job
+          const jobsWithMatch = (data.data || []).map(job => ({
+            ...job,
+            matchScore: calculateSkillMatch(userProfile.skills, job.requirements || [], job.description || '')
+          }));
+          
+          // Filter jobs with at least some match and sort by match score (highest first)
+          const recommended = jobsWithMatch
+            .filter(job => job.matchScore > 0)
+            .sort((a, b) => b.matchScore - a.matchScore)
+            .slice(0, 6);
+          
+          setRecommendedJobs(recommended);
+        } catch (err) {
+          console.error('Error fetching recommended jobs:', err);
+        } finally {
+          setLoadingRecommended(false);
+        }
+      }
+    };
+
+    fetchRecommendedJobs();
+  }, [user?.id, user?.role, userProfile?.skills]);
+
   const formatSalary = (min, max, currency = 'USD') => {
     if (!min && !max) return 'Salary not specified';
     const formatter = new Intl.NumberFormat('en-US', {
@@ -68,6 +104,29 @@ const Home = () => {
     if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`;
     if (min) return `From ${formatter.format(min)}`;
     return `Up to ${formatter.format(max)}`;
+  };
+
+  // Calculate skill match percentage between user skills and job requirements
+  const calculateSkillMatch = (userSkills = [], jobRequirements = [], jobDescription = '') => {
+    if (!userSkills || userSkills.length === 0) return 0;
+    
+    const userSkillsLower = userSkills.map(s => s.toLowerCase());
+    const jobReqsLower = jobRequirements.map(r => r.toLowerCase());
+    const descriptionLower = jobDescription.toLowerCase();
+    
+    let matches = 0;
+    userSkillsLower.forEach(skill => {
+      // Check if skill is in requirements
+      if (jobReqsLower.some(req => req.includes(skill) || skill.includes(req))) {
+        matches++;
+      }
+      // Also check in description
+      else if (descriptionLower.includes(skill)) {
+        matches++;
+      }
+    });
+    
+    return Math.round((matches / userSkills.length) * 100);
   };
 
   const [companyStats, setCompanyStats] = useState({
@@ -288,7 +347,7 @@ const Home = () => {
       {/* User Profile Card - Only for logged in USER role */}
       {user?.role === 'USER' && userProfile && (
         <section className="mt-16 mb-12 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
-          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-indigo-50">
+          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow !bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900">
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 {/* Left side - Profile info */}
@@ -298,10 +357,10 @@ const Home = () => {
                       {userProfile.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-900">{userProfile.name || 'User'}</h3>
-                      <p className="text-slate-600">{userProfile.email}</p>
+                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{userProfile.name || 'User'}</h3>
+                      <p className="text-slate-600 dark:text-slate-400">{userProfile.email}</p>
                       {userProfile.location && (
-                        <div className="flex items-center gap-1 text-slate-600 text-sm mt-1">
+                        <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400 text-sm mt-1">
                           <MapPin className="h-4 w-4" />
                           {userProfile.location}
                         </div>
@@ -311,27 +370,27 @@ const Home = () => {
 
                   {/* Bio */}
                   {userProfile.bio && (
-                    <p className="text-slate-700 text-sm mb-4 line-clamp-2">{userProfile.bio}</p>
+                    <p className="text-slate-700 dark:text-slate-300 text-sm mb-4 line-clamp-2">{userProfile.bio}</p>
                   )}
 
                   {/* Quick Stats */}
                   <div className="flex flex-wrap gap-4 text-sm">
                     {userProfile.skills && userProfile.skills.length > 0 && (
                       <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 text-blue-600" />
-                        <span className="text-slate-700"><strong>{userProfile.skills.length}</strong> Skills</span>
+                        <Award className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-slate-700 dark:text-slate-300"><strong>{userProfile.skills.length}</strong> Skills</span>
                       </div>
                     )}
                     {userProfile.experience && userProfile.experience.length > 0 && (
                       <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4 text-blue-600" />
-                        <span className="text-slate-700"><strong>{userProfile.experience.length}</strong> Experience</span>
+                        <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-slate-700 dark:text-slate-300"><strong>{userProfile.experience.length}</strong> Experience</span>
                       </div>
                     )}
                     {userProfile.education && userProfile.education.length > 0 && (
                       <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-blue-600" />
-                        <span className="text-slate-700"><strong>{userProfile.education.length}</strong> Education</span>
+                        <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-slate-700 dark:text-slate-300"><strong>{userProfile.education.length}</strong> Education</span>
                       </div>
                     )}
                   </div>
@@ -342,15 +401,15 @@ const Home = () => {
                   {/* Skills preview */}
                   {userProfile.skills && userProfile.skills.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-xs font-semibold text-slate-600 mb-2">Top Skills</p>
+                      <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Top Skills</p>
                       <div className="flex flex-wrap gap-2">
                         {userProfile.skills.slice(0, 3).map((skill, idx) => (
-                          <span key={idx} className="px-3 py-1 bg-white text-blue-700 text-xs font-medium rounded-full border border-blue-200 shadow-sm">
+                          <span key={idx} className="px-3 py-1 bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full border border-blue-200 dark:border-blue-600 shadow-sm">
                             {skill}
                           </span>
                         ))}
                         {userProfile.skills.length > 3 && (
-                          <span className="px-3 py-1 bg-white text-slate-600 text-xs font-medium rounded-full border border-slate-200">
+                          <span className="px-3 py-1 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-600">
                             +{userProfile.skills.length - 3}
                           </span>
                         )}
@@ -359,7 +418,7 @@ const Home = () => {
                   )}
 
                   {/* Edit Profile Button */}
-                  <Button asChild className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
+                  <Button asChild className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">
                     <Link to="/profile" className="flex items-center gap-2">
                       <Edit2 className="h-4 w-4" />
                       Edit Profile
@@ -451,6 +510,96 @@ const Home = () => {
           </div>
         )}
       </section>
+
+      {/* Recommended Jobs Section - Only for logged in USER role with skills */}
+      {user?.role === 'USER' && userProfile?.skills && userProfile.skills.length > 0 && (
+        <section className="mt-20">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold">Recommended Jobs for You</h2>
+            <Link to="/jobs" className="text-blue-600 hover:underline">View all jobs →</Link>
+          </div>
+          
+          {loadingRecommended ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="border rounded-lg p-6 animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+                  <div className="space-y-2">
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                    <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : recommendedJobs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recommendedJobs.map((job) => (
+                <Link 
+                  key={job.id} 
+                  to={`/jobs/${job.id}`}
+                  className="group block rounded-lg border border-border bg-card p-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:ring-2 hover:ring-ring/20 hover:bg-accent/5"
+                >
+                  {/* Match Score Badge */}
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg">{job.title}</h3>
+                      <p className="text-muted-foreground mt-1">
+                        {job.company?.name || 'Company'}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 ml-2">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white font-bold text-sm shadow-md">
+                        {job.matchScore}%
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Match indicator bar */}
+                  <div className="mb-3 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-300"
+                      style={{ width: `${job.matchScore}%` }}
+                    ></div>
+                  </div>
+                  
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      <span>{job.location}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      <span>{formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency)}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Briefcase className="h-4 w-4 mr-2" />
+                      <span className="capitalize">{job.jobType.toLowerCase().replace('_', ' ')}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                    <span className="px-2 py-1 text-xs rounded-full bg-secondary text-secondary-foreground">
+                      {job.experienceLevel}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 translate-x-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 border rounded-lg bg-muted/30">
+              <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground mb-4">No matching jobs found yet.</p>
+              <p className="text-sm text-muted-foreground mb-6">Add more skills to your profile to see personalized job recommendations.</p>
+              <Button asChild>
+                <Link to="/profile">Update Your Skills</Link>
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
+
       <section className="mt-20">
         <h2 className="text-2xl font-semibold mb-8 text-center">How It Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
