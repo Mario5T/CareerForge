@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
@@ -25,25 +25,25 @@ const Jobs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 10;
   const { toast } = useToast();
+  const debounceTimer = useRef(null);
 
+  // Fetch jobs on initial load
   useEffect(() => {
-    const fetchJobs = async (isFirst) => {
+    const fetchJobs = async () => {
       try {
-        if (isFirst) {
-          setInitialLoading(true);
-        } else {
-          setFetching(true);
-        }
-
+        setInitialLoading(true);
+        
         // Build query params for backend filtering
         const params = {};
         if (debouncedSearchTerm) params.search = debouncedSearchTerm;
         if (filters.location) params.location = filters.location;
         if (filters.jobType) params.jobType = filters.jobType;
         if (filters.experience) params.experienceLevel = filters.experience;
-
+        
         const response = await jobService.getAllJobs(params);
         setJobs(response.data || []);
+        setCurrentPage(1);
+        setInitialLoading(false);
       } catch (error) {
         console.error('Error fetching jobs:', error);
         toast({
@@ -51,26 +51,61 @@ const Jobs = () => {
           description: error.response?.data?.error || error.message || 'Failed to load jobs. Please try again later.',
           variant: 'destructive',
         });
-      } finally {
         setInitialLoading(false);
-        setFetching(false);
       }
     };
 
-    // Determine if this is the first load
-    const isFirst = initialLoading;
-    fetchJobs(isFirst);
+    fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Dynamic search with debounce
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        setFetching(true);
+        
+        // Build query params for backend filtering
+        const params = {};
+        if (debouncedSearchTerm) params.search = debouncedSearchTerm;
+        if (filters.location) params.location = filters.location;
+        if (filters.jobType) params.jobType = filters.jobType;
+        if (filters.experience) params.experienceLevel = filters.experience;
+        
+        const response = await jobService.getAllJobs(params);
+        setJobs(response.data || []);
+        setCurrentPage(1);
+        setFetching(false);
+      } catch (error) {
+        console.error('Error fetching jobs:', error);
+        toast({
+          title: 'Error',
+          description: error.response?.data?.error || error.message || 'Failed to load jobs. Please try again later.',
+          variant: 'destructive',
+        });
+        setFetching(false);
+      }
+    }, 300); // 300ms debounce for faster response
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchTerm, filters.location, filters.jobType, filters.experience]);
 
   const handleSearch = useCallback((e) => {
     e.preventDefault();
-    setSearchParams({
-      q: debouncedSearchTerm,
-      ...filters,
-    });
-  }, [debouncedSearchTerm, filters, setSearchParams]);
-
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    setFetching(true);
+  }, []);
   const handleFilterChange = useCallback((e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
