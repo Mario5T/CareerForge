@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login } from '../../store/slices/auth/authSlice';
 import { Button } from '../../components/ui/button';
@@ -15,11 +15,9 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
 
   const { email, password } = formData;
-  const from = location.state?.from?.pathname || '/';
 
   const handleChange = (e) => {
     setFormData({
@@ -39,7 +37,7 @@ const Login = () => {
         description: 'You have successfully logged in!',
         variant: 'default',
       });
-      navigate(from, { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       toast({
         title: 'Error',

@@ -79,6 +79,8 @@ const JobDetails = () => {
 
   const techSkills = job?.requirements ? extractTechSkills(job.requirements) : [];
   const isCompanyUser = user?.role === 'COMPANY';
+  const isRecruiter = user?.role === 'RECRUITER';
+  const isJobSeeker = user?.role === 'USER';
 
 
   useEffect(() => {
@@ -256,41 +258,54 @@ const JobDetails = () => {
             </div>
           </div>
           
-          {!isCompanyUser && (
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            {isJobSeeker && (
+              <>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="flex-1 md:flex-none"
+                  onClick={toggleSaveJob}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    'Saving...'
+                  ) : (
+                    <>
+                      <Bookmark className={`h-4 w-4 mr-2 ${isSaved ? 'fill-current' : ''}`} />
+                      {isSaved ? 'Saved' : 'Save Job'}
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  size="lg" 
+                  className="flex-1 md:flex-none"
+                  onClick={handleApply}
+                  disabled={applying}
+                >
+                  {applying ? (
+                    'Applying...'
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Apply Now
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+            {isRecruiter && (
               <Button 
-                variant="outline" 
                 size="lg" 
                 className="flex-1 md:flex-none"
-                onClick={toggleSaveJob}
-                disabled={saving}
+                disabled
+                title="Recruiters cannot apply for jobs"
               >
-                {saving ? (
-                  'Saving...'
-                ) : (
-                  <>
-                    <Bookmark className={`h-4 w-4 mr-2 ${isSaved ? 'fill-current' : ''}`} />
-                    {isSaved ? 'Saved' : 'Save Job'}
-                  </>
-                )}
+                <Send className="h-4 w-4 mr-2" />
+                Apply Now (Locked)
               </Button>
-              <Button 
-                size="lg" 
-                className="flex-1 md:flex-none"
-                onClick={handleApply}
-                disabled={applying}
-              >
-                {applying ? (
-                  'Applying...'
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Apply Now
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
