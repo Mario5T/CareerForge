@@ -333,9 +333,11 @@ const Home = () => {
  
 
         <div className="mt-10 flex justify-center gap-4">
-          <Button asChild>
-            <Link to="/jobs">Find Jobs</Link>
-          </Button>
+          {!user || user?.role === 'USER' ? (
+            <Button asChild>
+              <Link to="/jobs">Find Jobs</Link>
+            </Button>
+          ) : null}
           {(!user || user?.role === 'RECRUITER') && (
             <Button variant="outline" asChild>
               <Link to="/employer/post-job">Post a Job</Link>
