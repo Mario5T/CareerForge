@@ -1,6 +1,7 @@
 const userService = require('../services/user.service');
 const { successResponse, errorResponse } = require('../utils/response');
 const logger = require('../utils/logger');
+const fs = require('fs');
 
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
@@ -233,5 +234,66 @@ exports.getUserPublic = async (req, res) => {
     res.json(publicUser);
   }catch(err){
     res.status(500).json({message:"Server error"});
+  }
+};
+
+exports.uploadResume = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const resumePath = req.file.path.replace(/\\/g, '/'); // Normalize path for different OS
+    
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        resume: resumePath,
+        resumeOriginalName: req.file.originalname
+      }
+    });
+
+    res.json({
+      message: 'Resume uploaded successfully',
+      resume: updatedUser.resume,
+      resumeOriginalName: updatedUser.resumeOriginalName
+    });
+  } catch (err) {
+    console.error('Resume upload error:', err);
+    // Delete file if database update fails
+    if (req.file) {
+      fs.unlink(req.file.path, (unlinkErr) => {
+        if (unlinkErr) console.error('Error deleting file after failed update:', unlinkErr);
+      });
+    }
+    res.status(500).json({ message: 'Failed to upload resume' });
+  }
+};
+
+exports.deleteResume = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id }
+    });
+
+    if (user.resume) {
+      // Try to delete file from filesystem
+      fs.unlink(user.resume, (err) => {
+        if (err) console.error('Error deleting resume file:', err);
+      });
+    }
+
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        resume: null,
+        resumeOriginalName: null
+      }
+    });
+
+    res.json({ message: 'Resume removed successfully' });
+  } catch (err) {
+    console.error('Resume deletion error:', err);
+    res.status(500).json({ message: 'Failed to remove resume' });
   }
 };
