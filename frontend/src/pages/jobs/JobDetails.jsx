@@ -25,6 +25,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import jobService from '../../services/job.service';
+import api from '../../services/api';
 import { PREDEFINED_SKILLS } from '../../constants/skills';
 const normalize = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const TECH_STACK_SUBSTRINGS = [
@@ -98,8 +99,17 @@ const JobDetails = () => {
           console.error('Error fetching related jobs:', err);
         }
         
-        const savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-        setIsSaved(savedJobs.includes(id));
+        // Check if job is saved
+        if (isAuthenticated) {
+          try {
+            const savedJobsResponse = await api.get('/users/saved-jobs');
+            const savedJobIds = new Set(savedJobsResponse.data.map(j => j.id));
+            setIsSaved(savedJobIds.has(id));
+          } catch (err) {
+            console.error('Error checking saved status:', err);
+          }
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error fetching job:', error);
@@ -115,7 +125,7 @@ const JobDetails = () => {
     fetchJob();
     // We intentionally only depend on `id` here to avoid re-running
     // when the `toast` function identity changes on each render.
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   const handleApply = async () => {
     if (!isAuthenticated) {
@@ -155,26 +165,21 @@ const JobDetails = () => {
 
     setSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-    
-      const savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-      let updatedSavedJobs;
-      
       if (isSaved) {
-        updatedSavedJobs = savedJobs.filter(jobId => jobId !== id);
+        await api.delete(`/users/saved-jobs/${id}`);
+        setIsSaved(false);
+        toast({
+          title: 'Job Removed',
+          description: 'This job has been removed from your saved jobs.',
+        });
       } else {
-        updatedSavedJobs = [...savedJobs, id];
+        await api.post(`/users/saved-jobs/${id}`);
+        setIsSaved(true);
+        toast({
+          title: 'Job Saved!',
+          description: 'You can view this job later in your saved jobs.',
+        });
       }
-      
-      localStorage.setItem('savedJobs', JSON.stringify(updatedSavedJobs));
-      setIsSaved(!isSaved);
-      
-      toast({
-        title: isSaved ? 'Job Removed' : 'Job Saved!',
-        description: isSaved 
-          ? 'This job has been removed from your saved jobs.'
-          : 'You can view this job later in your saved jobs.',
-      });
     } catch (error) {
       toast({
         title: 'Error',

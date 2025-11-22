@@ -297,3 +297,94 @@ exports.deleteResume = async (req, res) => {
     res.status(500).json({ message: 'Failed to remove resume' });
   }
 };
+
+exports.saveJob = async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+    const userId = req.user.id;
+
+    // Check if job exists
+    const job = await prisma.job.findUnique({
+      where: { id: jobId }
+    });
+
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    // Check if already saved
+    const userWithSavedJob = await prisma.user.findFirst({
+      where: {
+        id: userId,
+        savedJobs: {
+          some: {
+            id: jobId
+          }
+        }
+      }
+    });
+
+    if (userWithSavedJob) {
+      return res.json({ message: 'Job already saved', success: true });
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        savedJobs: {
+          connect: { id: jobId }
+        }
+      }
+    });
+
+    res.json({ message: 'Job saved successfully', success: true });
+  } catch (err) {
+    console.error('Save job error details:', JSON.stringify(err, null, 2));
+    if (err.code === 'P2025') { // Prisma record not found error
+      return res.status(404).json({ message: 'Job not found' });
+    }
+    res.status(500).json({ message: 'Failed to save job', error: err.message });
+  }
+};
+
+exports.unsaveJob = async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+    const userId = req.user.id;
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        savedJobs: {
+          disconnect: { id: jobId }
+        }
+      }
+    });
+
+    res.json({ message: 'Job removed from saved jobs', success: true });
+  } catch (err) {
+    console.error('Unsave job error:', err);
+    res.status(500).json({ message: 'Failed to unsave job' });
+  }
+};
+
+exports.getSavedJobs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        savedJobs: {
+          include: {
+            company: true
+          }
+        }
+      }
+    });
+
+    res.json(user.savedJobs);
+  } catch (err) {
+    console.error('Get saved jobs error:', err);
+    res.status(500).json({ message: 'Failed to fetch saved jobs' });
+  }
+};

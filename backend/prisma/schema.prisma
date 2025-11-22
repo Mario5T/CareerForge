@@ -38,6 +38,7 @@ model User {
   ownedCompanies Company[]    @relation("CompanyOwner")
   experience     WorkExperience[]
   education      Education[]
+  savedJobs      Job[]        @relation("SavedJobs")
 
   @@index([email])
   @@index([googleId])
@@ -109,8 +110,10 @@ model Job {
   employerId    String
   employer      Employer        @relation(fields: [employerId], references: [id], onDelete: Cascade)
   createdById   String
+
   createdBy     User            @relation("JobCreator", fields: [createdById], references: [id], onDelete: Cascade)
   applications  Application[]
+  savedBy       User[]          @relation("SavedJobs")
 
   @@index([companyId])
   @@index([employerId])
