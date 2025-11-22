@@ -8,7 +8,7 @@ import { useToast } from '../../components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import api from '../../services/api';
 import { PREDEFINED_SKILLS } from '../../constants/skills';
-import { X, Plus, Trash2, Edit2, Calendar, MapPin, Briefcase } from 'lucide-react';
+import { X, Plus, Trash2, Edit2, Calendar, MapPin, Briefcase, FileText, Upload, Download } from 'lucide-react';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -28,7 +28,10 @@ const Profile = () => {
     bio: '',
     skills: [],
     experience: [],
+    experience: [],
     education: [],
+    resume: '',
+    resumeOriginalName: '',
   });
 
   const [experienceForm, setExperienceForm] = useState({
@@ -73,6 +76,8 @@ const Profile = () => {
             skills: Array.isArray(userData.skills) ? userData.skills : [],
             experience: Array.isArray(userData.experience) ? userData.experience : [],
             education: Array.isArray(userData.education) ? userData.education : [],
+            resume: userData.resume || '',
+            resumeOriginalName: userData.resumeOriginalName || '',
           });
         } catch (error) {
           console.error('Error fetching profile:', error);
@@ -167,6 +172,8 @@ const Profile = () => {
           skills: Array.isArray(response.data.user.skills) ? response.data.user.skills : [],
           experience: Array.isArray(response.data.user.experience) ? response.data.user.experience : [],
           education: Array.isArray(response.data.user.education) ? response.data.user.education : [],
+          resume: response.data.user.resume || '',
+          resumeOriginalName: response.data.user.resumeOriginalName || '',
         });
       }
       
@@ -314,6 +321,94 @@ const Profile = () => {
     setEducationForm(education);
     setEditingEducationId(education.id);
     setShowEducationForm(true);
+  };
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== 'application/pdf' && 
+        file.type !== 'application/msword' && 
+        file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      toast({
+        title: 'Error',
+        description: 'Please upload a PDF or DOC/DOCX file',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'Error',
+        description: 'File size should be less than 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('resume', file);
+
+    try {
+      setIsLoading(true);
+      const response = await api.put('/users/resume', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setProfile(prev => ({
+        ...prev,
+        resume: response.data.resume,
+        resumeOriginalName: response.data.resumeOriginalName
+      }));
+
+      toast({
+        title: 'Success',
+        description: 'Resume uploaded successfully!',
+      });
+    } catch (error) {
+      console.error('Resume upload error:', error);
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to upload resume',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResumeDelete = async () => {
+    if (!window.confirm('Are you sure you want to remove your resume?')) return;
+
+    try {
+      setIsLoading(true);
+      await api.delete('/users/resume');
+
+      setProfile(prev => ({
+        ...prev,
+        resume: '',
+        resumeOriginalName: ''
+      }));
+
+      toast({
+        title: 'Success',
+        description: 'Resume removed successfully!',
+      });
+    } catch (error) {
+      console.error('Resume delete error:', error);
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to remove resume',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -927,6 +1022,116 @@ const Profile = () => {
                 <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Add your first education to get started</p>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Resume Card */}
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
+          <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
+            <CardTitle className="text-xl text-slate-900 dark:text-white">Resume</CardTitle>
+            <CardDescription>
+              Upload your resume to share with employers
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              {profile.resume ? (
+                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                        {profile.resumeOriginalName || 'My Resume'}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Uploaded resume
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a 
+                      href={`http://localhost:5001/${profile.resume}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 rounded-full transition-colors"
+                      title="Download Resume"
+                    >
+                      <Download className="h-5 w-5" />
+                    </a>
+                    {isEditing && (
+                      <div className="flex gap-2">
+                        <div className="relative">
+                          <input
+                            type="file"
+                            id="resume-update"
+                            className="hidden"
+                            accept=".pdf,.doc,.docx"
+                            onChange={handleResumeUpload}
+                            disabled={isLoading}
+                          />
+                          <label 
+                            htmlFor="resume-update"
+                            className={`p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 rounded-full transition-colors cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            title="Update Resume"
+                          >
+                            <Edit2 className="h-5 w-5" />
+                          </label>
+                        </div>
+                        <button
+                          onClick={handleResumeDelete}
+                          disabled={isLoading}
+                          className="p-2 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
+                          title="Remove Resume"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-lg">
+                  <div className="mx-auto w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">
+                    <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+                  </div>
+                  <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-1">
+                    Upload your resume
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                    PDF, DOC, DOCX up to 5MB
+                  </p>
+                  {isEditing ? (
+                    <div className="relative inline-block">
+                      <input
+                        type="file"
+                        id="resume-upload"
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleResumeUpload}
+                        disabled={isLoading}
+                      />
+                      <label 
+                        htmlFor="resume-upload"
+                        className={`inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <Plus className="h-4 w-4" />
+                        Select File
+                      </label>
+                    </div>
+                  ) : (
+                    <Button 
+                      onClick={() => setIsEditing(true)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Edit Profile to Upload
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

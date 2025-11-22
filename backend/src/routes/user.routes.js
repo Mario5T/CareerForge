@@ -21,13 +21,16 @@
 
 const express=require('express');
 const router=express.Router();
-const {registerUser,loginUser,getProfile,updateProfile,getUserPublic}=require('../controllers/user.controller');
+const {registerUser,loginUser,getProfile,updateProfile,getUserPublic,uploadResume,deleteResume}=require('../controllers/user.controller');
 const {protect}=require('../middlewares/auth.middleware');
+const upload = require('../middlewares/upload.middleware');
 
 router.post('/register',registerUser);
 router.post('/login',loginUser);
 router.get('/profile',protect,getProfile);
 router.put('/profile',protect,updateProfile);
+router.put('/resume', protect, upload.single('resume'), uploadResume);
+router.delete('/resume', protect, deleteResume);
 
 // Public user profile by ID (must be after '/profile' to avoid conflicts)
 router.get('/:id', getUserPublic);

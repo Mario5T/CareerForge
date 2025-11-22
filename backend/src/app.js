@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -86,6 +87,7 @@ app.use('/api/v1/employer', employerRoutes);
 app.use('/api/v1/jobs', jobRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/chatbot', chatbotRoutes);
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use((req, res) => {
   res.status(404).json({
