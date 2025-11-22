@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -8,17 +9,18 @@ import { useToast } from '../../components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import api from '../../services/api';
 import { PREDEFINED_SKILLS } from '../../constants/skills';
-import { X, Plus, Trash2, Edit2, Calendar, MapPin, Briefcase, FileText, Upload, Download } from 'lucide-react';
+import { X, Plus, Trash2, Edit2, Calendar, MapPin, Briefcase, FileText, Upload, Download, User, Bookmark, DollarSign } from 'lucide-react';
 
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showExperienceForm, setShowExperienceForm] = useState(false);
   const [showEducationForm, setShowEducationForm] = useState(false);
-  const [editingExperienceId, setEditingExperienceId] = useState(null);
   const [editingEducationId, setEditingEducationId] = useState(null);
+  const [activeTab, setActiveTab] = useState('profile');
   
   const [profile, setProfile] = useState({
     name: '',
@@ -28,10 +30,11 @@ const Profile = () => {
     bio: '',
     skills: [],
     experience: [],
-    experience: [],
+
     education: [],
     resume: '',
     resumeOriginalName: '',
+    savedJobs: [],
   });
 
   const [experienceForm, setExperienceForm] = useState({
@@ -78,7 +81,19 @@ const Profile = () => {
             education: Array.isArray(userData.education) ? userData.education : [],
             resume: userData.resume || '',
             resumeOriginalName: userData.resumeOriginalName || '',
+            savedJobs: [],
           });
+
+          // Fetch saved jobs separately
+          try {
+            const savedJobsResponse = await api.get('/users/saved-jobs');
+            setProfile(prev => ({
+              ...prev,
+              savedJobs: Array.isArray(savedJobsResponse.data) ? savedJobsResponse.data : []
+            }));
+          } catch (error) {
+            console.error('Error fetching saved jobs:', error);
+          }
         } catch (error) {
           console.error('Error fetching profile:', error);
           // Fallback to user data from auth
@@ -174,6 +189,7 @@ const Profile = () => {
           education: Array.isArray(response.data.user.education) ? response.data.user.education : [],
           resume: response.data.user.resume || '',
           resumeOriginalName: response.data.user.resumeOriginalName || '',
+          savedJobs: Array.isArray(response.data.user.savedJobs) ? response.data.user.savedJobs : [],
         });
       }
       
@@ -411,40 +427,97 @@ const Profile = () => {
     }
   };
 
+  const handleUnsaveJob = async (e, jobId) => {
+    e.stopPropagation();
+    try {
+      await api.delete(`/users/saved-jobs/${jobId}`);
+      setProfile(prev => ({
+        ...prev,
+        savedJobs: prev.savedJobs.filter(job => job.id !== jobId)
+      }));
+      toast({
+        title: 'Success',
+        description: 'Job removed from saved jobs',
+      });
+    } catch (error) {
+      console.error('Unsave job error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to unsave job',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white">My Profile</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">Build and manage your professional profile</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Sidebar Navigation */}
+          <div className="md:col-span-1 space-y-4">
+            <Card className="border-0 shadow-sm dark:bg-slate-800 overflow-hidden">
+              <div className="p-4 space-y-2">
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeTab === 'profile'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <User className="h-5 w-5" />
+                  My Profile
+                </button>
+                <button
+                  onClick={() => setActiveTab('saved-jobs')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeTab === 'saved-jobs'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <Bookmark className="h-5 w-5" />
+                  Saved Jobs
+                </button>
+              </div>
+            </Card>
           </div>
-          {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)} className="bg-blue-600 hover:bg-blue-700">
-              Edit Profile
-            </Button>
-          ) : (
-            <div className="space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isLoading ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
-          )}
-        </div>
 
-      <div className="grid gap-6">
-        {/* Personal Information Card */}
+          {/* Main Content */}
+          <div className="md:col-span-3 space-y-6">
+            {activeTab === 'profile' ? (
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">My Profile</h1>
+                    <p className="text-slate-600 dark:text-slate-400 mt-1">Manage your professional information</p>
+                  </div>
+                  {!isEditing ? (
+                    <Button onClick={() => setIsEditing(true)} className="bg-blue-600 hover:bg-blue-700">
+                      Edit Profile
+                    </Button>
+                  ) : (
+                    <div className="space-x-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setIsEditing(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {isLoading ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Personal Information Card */}
         <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
             <CardTitle className="text-xl text-slate-900 dark:text-white">Personal Information</CardTitle>
@@ -1134,8 +1207,76 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-      </div>
+              </>
+            ) : (
+              /* Saved Jobs Card */
+              <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
+                <CardHeader className="bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
+                  <CardTitle className="text-xl text-slate-900 dark:text-white">Saved Jobs</CardTitle>
+                  <CardDescription>
+                    Jobs you have bookmarked for later
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  {profile.savedJobs.length > 0 ? (
+                    <div className="space-y-4">
+                      {profile.savedJobs.map((job) => (
+                        <div 
+                          key={job.id} 
+                          className="p-4 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-slate-300 dark:hover:border-slate-500 transition-colors cursor-pointer hover:shadow-sm"
+                          onClick={() => navigate(`/jobs/${job.id}`)}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <h4 className="text-lg font-semibold text-slate-900 dark:text-white hover:text-blue-600 transition-colors">
+                                <a href={`/jobs/${job.id}`}>{job.title}</a>
+                              </h4>
+                              <p className="text-slate-600 dark:text-slate-400 font-medium">{job.company?.name || 'Company'}</p>
+                              <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-4 w-4" />
+                                  {job.location}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Briefcase className="h-4 w-4" />
+                                  {job.jobType?.replace('_', ' ')}
+                                </div>
+                                {job.salaryMin && (
+                                  <div className="flex items-center gap-1">
+                                    <DollarSign className="h-4 w-4" />
+                                    {job.salaryMin.toLocaleString()}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              onClick={(e) => handleUnsaveJob(e, job.id)}
+                              variant="ghost"
+                              size="sm"
+                              className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                              title="Remove from saved jobs"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Briefcase className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                      <p className="text-slate-500 dark:text-slate-400 font-medium">No saved jobs yet</p>
+                      <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">
+                        <a href="/jobs" className="text-blue-600 hover:underline">Browse jobs</a> to save them here
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+    </div>
     </div>
   );
 };

@@ -4,9 +4,10 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
-import { Search, MapPin, Briefcase, Clock, DollarSign, Building2, ArrowRight } from 'lucide-react';
+import { Search, MapPin, Briefcase, Clock, DollarSign, Building2, ArrowRight, Bookmark } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import jobService from '../../services/job.service';
+import api from '../../services/api';
 import SearchBar from '../../components/SearchBar';
 import useDebounce from '../../hooks/useDebounce';
 
@@ -26,6 +27,45 @@ const Jobs = () => {
   const jobsPerPage = 10;
   const { toast } = useToast();
   const debounceTimer = useRef(null);
+  const [savedJobs, setSavedJobs] = useState(new Set());
+
+  // Fetch saved jobs
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      try {
+        const response = await api.get('/users/saved-jobs');
+        const savedJobIds = new Set(response.data.map(job => job.id));
+        setSavedJobs(savedJobIds);
+      } catch (error) {
+        console.error('Error fetching saved jobs:', error);
+      }
+    };
+    fetchSavedJobs();
+  }, []);
+
+  const toggleSaveJob = async (jobId) => {
+    try {
+      if (savedJobs.has(jobId)) {
+        await api.delete(`/users/saved-jobs/${jobId}`);
+        setSavedJobs(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(jobId);
+          return newSet;
+        });
+        toast({ title: 'Job removed from saved jobs' });
+      } else {
+        await api.post(`/users/saved-jobs/${jobId}`);
+        setSavedJobs(prev => new Set(prev).add(jobId));
+        toast({ title: 'Job saved successfully' });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update saved jobs',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Fetch jobs on initial load
   useEffect(() => {
@@ -221,11 +261,23 @@ const Jobs = () => {
                       <Building2 className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">
-                        <Link to={`/jobs/${job.id}`} className="hover:underline">
-                          {job.title}
-                        </Link>
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-lg">
+                          <Link to={`/jobs/${job.id}`} className="hover:underline">
+                            {job.title}
+                          </Link>
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => toggleSaveJob(job.id)}
+                        >
+                          <Bookmark
+                            className={`h-4 w-4 ${savedJobs.has(job.id) ? 'fill-current text-primary' : 'text-muted-foreground'}`}
+                          />
+                        </Button>
+                      </div>
                       <p className="text-muted-foreground">{job.company?.name || 'Company'}</p>
                       <div className="flex flex-wrap gap-2 mt-2">
                         <Badge variant="secondary" className="flex items-center gap-1">
