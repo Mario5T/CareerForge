@@ -42,6 +42,10 @@ const jobService = {
     const response = await api.patch(`/jobs/applications/${applicationId}`, { status });
     return response.data;
   },
+  getMyApplications: async () => {
+    const response = await api.get('/jobs/applications/me');
+    return response.data;
+  },
 };
 
 export default jobService;

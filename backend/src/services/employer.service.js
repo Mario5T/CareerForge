@@ -342,3 +342,73 @@ exports.updateApplicationStatus = async (applicationId, userId, status) => {
 
   return updated;
 };
+
+exports.deleteApplication = async (applicationId, userId) => {
+  const application = await prisma.application.findUnique({
+    where: { id: applicationId },
+    include: {
+      job: true,
+    },
+  });
+
+  if (!application) throw new AppError('Application not found', 404);
+
+  const userEmployer = await prisma.employer.findUnique({
+    where: {
+      userId_companyId: {
+        userId,
+        companyId: application.job.companyId,
+      },
+    },
+  });
+
+  if (!userEmployer) throw new AppError('Not authorized to delete this application', 403);
+
+  await prisma.application.delete({
+    where: { id: applicationId },
+  });
+};
+
+exports.getDashboardStats = async (userId) => {
+  const employer = await prisma.employer.findFirst({
+    where: { userId },
+  });
+  if (!employer) throw new AppError('Employer profile not found', 404);
+
+  const activeJobs = await prisma.job.count({
+    where: {
+      createdById: userId,
+      isActive: true
+    }
+  });
+
+  const applicationStats = await prisma.application.groupBy({
+    by: ['status'],
+    where: {
+      job: {
+        createdById: userId
+      }
+    },
+    _count: {
+      _all: true
+    }
+  });
+
+  let totalApplications = 0;
+  let pendingApplications = 0;
+  let acceptedApplications = 0;
+
+  applicationStats.forEach(stat => {
+    const count = stat._count._all;
+    totalApplications += count;
+    if (stat.status === 'PENDING') pendingApplications = count;
+    if (stat.status === 'ACCEPTED') acceptedApplications = count;
+  });
+
+  return {
+    activeJobs,
+    totalApplications,
+    pendingApplications,
+    acceptedApplications,
+  };
+};

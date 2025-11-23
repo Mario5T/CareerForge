@@ -105,3 +105,23 @@ exports.updateApplicationStatus = async (req, res) => {
     errorResponse(res, error.statusCode || 500, error.message);
   }
 };
+
+exports.deleteApplication = async (req, res) => {
+  try {
+    await employerService.deleteApplication(req.params.applicationId, req.user.id);
+    successResponse(res, 200, 'Application deleted successfully');
+  } catch (error) {
+    logger.error(`Delete application error: ${error.message}`);
+    errorResponse(res, error.statusCode || 500, error.message);
+  }
+};
+
+exports.getDashboardStats = async (req, res) => {
+  try {
+    const stats = await employerService.getDashboardStats(req.user.id);
+    successResponse(res, 200, 'Dashboard stats retrieved successfully', stats);
+  } catch (error) {
+    logger.error(`Get dashboard stats error: ${error.message}`);
+    errorResponse(res, error.statusCode || 500, error.message);
+  }
+};

@@ -6,6 +6,7 @@ const { validate } = require('../middlewares/validate.middleware');
 
 // Public routes
 router.get('/', jobController.getAllJobs);
+router.get('/applications/me', protect, jobController.getMyApplications);
 router.get('/:id', jobController.getJobById);
 
 // Protected routes (require authentication)

@@ -230,8 +230,9 @@ exports.getUserPublic = async (req, res) => {
     if(!user){
       return res.status(404).json({ message: 'User not found' });
     }
-    const { password, email, phone, resume, resumeOriginalName, googleId, provider, ...publicUser } = user;
-    res.json(publicUser);
+    // Exclude sensitive fields but keep resume and contact info for public profile
+    const { password, googleId, provider, ...publicProfile } = user;
+    res.json(publicProfile);
   }catch(err){
     res.status(500).json({message:"Server error"});
   }

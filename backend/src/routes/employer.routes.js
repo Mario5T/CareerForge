@@ -8,6 +8,7 @@ const { employerValidation, jobValidation } = require('../middlewares/validate.m
 router.post('/company', protect, validate(employerValidation.createCompanyProfile), employerController.createCompanyProfile);
 router.put('/company', protect, validate(employerValidation.updateCompanyProfile), employerController.updateCompanyProfile);
 router.get('/company', protect, employerController.getMyCompany);
+router.get('/stats', protect, employerController.getDashboardStats);
 
 router.post('/jobs', protect, validate(jobValidation.create), employerController.createJob);
 router.get('/jobs', protect, employerController.getMyJobs);
@@ -16,5 +17,6 @@ router.put('/jobs/:jobId', protect, validate(jobValidation.update), employerCont
 router.delete('/jobs/:jobId', protect, employerController.deleteJob);
 router.get('/jobs/:jobId/applicants', protect, employerController.getApplicantsForJob);
 router.patch('/applications/:applicationId/status', protect, validate(jobValidation.updateApplicationStatus), employerController.updateApplicationStatus);
+router.delete('/applications/:applicationId', protect, employerController.deleteApplication);
 
 module.exports = router; 
