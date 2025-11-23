@@ -175,4 +175,4 @@ The API uses a centralized error handling mechanism with custom error classes. A
 
 ## License
 
-ISC
+ICSE
