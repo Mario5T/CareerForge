@@ -83,6 +83,8 @@ const JobDetails = () => {
   const isJobSeeker = user?.role === 'USER';
 
 
+  const [hasApplied, setHasApplied] = useState(false);
+
   useEffect(() => {
     const fetchJob = async () => {
       try {
@@ -101,14 +103,23 @@ const JobDetails = () => {
           console.error('Error fetching related jobs:', err);
         }
         
-        // Check if job is saved
         if (isAuthenticated) {
+          // Check if job is saved
           try {
             const savedJobsResponse = await api.get('/users/saved-jobs');
             const savedJobIds = new Set(savedJobsResponse.data.map(j => j.id));
             setIsSaved(savedJobIds.has(id));
           } catch (err) {
             console.error('Error checking saved status:', err);
+          }
+
+          // Check if already applied
+          try {
+            const applicationsResponse = await jobService.getMyApplications();
+            const appliedJobIds = new Set(applicationsResponse.data.map(app => app.jobId));
+            setHasApplied(appliedJobIds.has(id));
+          } catch (err) {
+            console.error('Error checking application status:', err);
           }
         }
         
@@ -148,6 +159,7 @@ const JobDetails = () => {
           </Button>
         ),
       });
+      setHasApplied(true);
     } catch (error) {
       toast({
         title: 'Error',
@@ -281,10 +293,16 @@ const JobDetails = () => {
                   size="lg" 
                   className="flex-1 md:flex-none"
                   onClick={handleApply}
-                  disabled={applying}
+                  disabled={applying || hasApplied}
+                  variant={hasApplied ? "secondary" : "default"}
                 >
                   {applying ? (
                     'Applying...'
+                  ) : hasApplied ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Applied
+                    </>
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />

@@ -45,32 +45,14 @@ const EmployerHomepage = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await employerService.getMyJobs();
-      const jobs = response.data || [];
-
-      const activeJobs = jobs.filter((job) => job.isActive).length;
-      const totalApplications = jobs.reduce(
-        (sum, job) => sum + (job._count?.applications || 0),
-        0
-      );
-      const pendingApplications = jobs.reduce((sum, job) => {
-        const pending = (job.applications || []).filter(
-          (app) => app.status === 'PENDING'
-        ).length;
-        return sum + pending;
-      }, 0);
-      const acceptedApplications = jobs.reduce((sum, job) => {
-        const accepted = (job.applications || []).filter(
-          (app) => app.status === 'ACCEPTED'
-        ).length;
-        return sum + accepted;
-      }, 0);
+      const response = await employerService.getDashboardStats();
+      const stats = response.data || {};
 
       setStats({
-        activeJobs,
-        totalApplications,
-        pendingApplications,
-        acceptedApplications,
+        activeJobs: stats.activeJobs || 0,
+        totalApplications: stats.totalApplications || 0,
+        pendingApplications: stats.pendingApplications || 0,
+        acceptedApplications: stats.acceptedApplications || 0,
         loading: false,
       });
     } catch (error) {

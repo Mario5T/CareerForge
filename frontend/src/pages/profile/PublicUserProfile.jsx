@@ -36,7 +36,7 @@ const PublicUserProfile = () => {
     if (id) {
       fetchProfile();
     }
-  }, [id, toast]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -83,9 +83,9 @@ const PublicUserProfile = () => {
                 </div>
                 <div>
                   <CardTitle className="text-2xl font-bold">
-                    {profile.firstName} {profile.lastName}
+                    {profile.name}
                   </CardTitle>
-                  <p className="text-muted-foreground mt-1">{profile.headline}</p>
+                  <p className="text-muted-foreground mt-1">{profile.bio}</p>
                   <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
                     {profile.location && (
                       <div className="flex items-center space-x-1">
@@ -102,10 +102,30 @@ const PublicUserProfile = () => {
                   </div>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download CV
-              </Button>
+              {profile.resume ? (
+                <Button variant="outline" size="sm" asChild>
+                  <a 
+                    href={(() => {
+                      if (profile.resume.startsWith('http')) return profile.resume;
+                      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
+                      const BASE_URL = API_URL.replace('/api/v1', '');
+                      // Ensure no double slashes if path starts with /
+                      const cleanPath = profile.resume.startsWith('/') ? profile.resume.slice(1) : profile.resume;
+                      return `${BASE_URL}/${cleanPath}`;
+                    })()} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download CV
+                  </a>
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" disabled>
+                  <Download className="h-4 w-4 mr-2" />
+                  No Resume Attached
+                </Button>
+              )}
             </div>
           </CardHeader>
         </Card>
@@ -142,13 +162,13 @@ const PublicUserProfile = () => {
                     <div key={index} className="border-l-2 border-border pl-4 pb-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-semibold">{exp.position}</h4>
+                          <h4 className="font-semibold">{exp.jobTitle}</h4>
                           <p className="text-muted-foreground">{exp.company}</p>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
+                            {exp.startDate} - {exp.currentlyWorking ? 'Present' : exp.endDate}
                           </p>
                         </div>
-                        <Badge variant="secondary">{exp.type}</Badge>
+                        <Badge variant="secondary">{exp.employmentType}</Badge>
                       </div>
                       {exp.description && (
                         <p className="text-sm text-muted-foreground mt-2">{exp.description}</p>
@@ -176,12 +196,12 @@ const PublicUserProfile = () => {
                       </div>
                       <div>
                         <h4 className="font-semibold">{edu.degree}</h4>
-                        <p className="text-muted-foreground">{edu.institution}</p>
+                        <p className="text-muted-foreground">{edu.university}</p>
                         <p className="text-sm text-muted-foreground">
-                          {edu.startDate} - {edu.current ? 'Present' : edu.endDate}
+                          {edu.startYear} - {edu.isPresent ? 'Present' : edu.endYear}
                         </p>
-                        {edu.field && (
-                          <Badge variant="outline" className="mt-1">{edu.field}</Badge>
+                        {edu.fieldOfStudy && (
+                          <Badge variant="outline" className="mt-1">{edu.fieldOfStudy}</Badge>
                         )}
                       </div>
                     </div>

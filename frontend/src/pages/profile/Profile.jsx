@@ -8,6 +8,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { useToast } from '../../components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import api from '../../services/api';
+import jobService from '../../services/job.service';
 import { PREDEFINED_SKILLS } from '../../constants/skills';
 import { X, Plus, Trash2, Edit2, Calendar, MapPin, Briefcase, FileText, Upload, Download, User, Bookmark, DollarSign } from 'lucide-react';
 
@@ -34,7 +35,10 @@ const Profile = () => {
     education: [],
     resume: '',
     resumeOriginalName: '',
+    resume: '',
+    resumeOriginalName: '',
     savedJobs: [],
+    applications: [],
   });
 
   const [experienceForm, setExperienceForm] = useState({
@@ -93,6 +97,17 @@ const Profile = () => {
             }));
           } catch (error) {
             console.error('Error fetching saved jobs:', error);
+          }
+
+          // Fetch applications
+          try {
+            const applicationsResponse = await jobService.getMyApplications();
+            setProfile(prev => ({
+              ...prev,
+              applications: Array.isArray(applicationsResponse.data) ? applicationsResponse.data : []
+            }));
+          } catch (error) {
+            console.error('Error fetching applications:', error);
           }
         } catch (error) {
           console.error('Error fetching profile:', error);
@@ -479,6 +494,17 @@ const Profile = () => {
                 >
                   <Bookmark className="h-5 w-5" />
                   Saved Jobs
+                </button>
+                <button
+                  onClick={() => setActiveTab('applied-jobs')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    activeTab === 'applied-jobs'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <Briefcase className="h-5 w-5" />
+                  Applied Jobs
                 </button>
               </div>
             </Card>
@@ -1208,7 +1234,7 @@ const Profile = () => {
           </CardContent>
         </Card>
               </>
-            ) : (
+            ) : activeTab === 'saved-jobs' ? (
               /* Saved Jobs Card */
               <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
                 <CardHeader className="bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
@@ -1219,64 +1245,128 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="pt-6">
                   {profile.savedJobs.length > 0 ? (
-                    <div className="space-y-4">
-                      {profile.savedJobs.map((job) => (
-                        <div 
-                          key={job.id} 
-                          className="p-4 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-slate-300 dark:hover:border-slate-500 transition-colors cursor-pointer hover:shadow-sm"
-                          onClick={() => navigate(`/jobs/${job.id}`)}
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <h4 className="text-lg font-semibold text-slate-900 dark:text-white hover:text-blue-600 transition-colors">
-                                <a href={`/jobs/${job.id}`}>{job.title}</a>
-                              </h4>
-                              <p className="text-slate-600 dark:text-slate-400 font-medium">{job.company?.name || 'Company'}</p>
-                              <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="h-4 w-4" />
-                                  {job.location}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Briefcase className="h-4 w-4" />
-                                  {job.jobType?.replace('_', ' ')}
-                                </div>
-                                {job.salaryMin && (
-                                  <div className="flex items-center gap-1">
+                  <div className="grid gap-4">
+                    {profile.savedJobs.map((job) => (
+                      <Card key={job.id} className="hover:shadow-md transition-shadow dark:bg-slate-800 cursor-pointer" onClick={() => navigate(`/jobs/${job.id}`)}>
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start">
+                            <div className="flex gap-4">
+                              <div>
+                                <h3 className="font-semibold text-lg text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                                  {job.title}
+                                </h3>
+                                <p className="text-slate-600 dark:text-slate-400">{job.company?.name}</p>
+                                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="h-4 w-4" />
+                                    {job.location}
+                                  </span>
+                                  <span className="flex items-center gap-1">
                                     <DollarSign className="h-4 w-4" />
-                                    {job.salaryMin.toLocaleString()}
-                                  </div>
-                                )}
+                                    {job.salaryMin ? `$${job.salaryMin.toLocaleString()}` : 'Salary not specified'}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-4 w-4" />
+                                    Posted {new Date(job.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                             <Button
-                              onClick={(e) => handleUnsaveJob(e, job.id)}
                               variant="ghost"
-                              size="sm"
-                              className="text-slate-400 hover:text-red-600 hover:bg-red-50"
-                              title="Remove from saved jobs"
+                              size="icon"
+                              className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              onClick={(e) => handleUnsaveJob(e, job.id)}
                             >
-                              <Trash2 className="h-5 w-5" />
+                              <Bookmark className="h-5 w-5 fill-current" />
                             </Button>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Briefcase className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                      <p className="text-slate-500 dark:text-slate-400 font-medium">No saved jobs yet</p>
-                      <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">
-                        <a href="/jobs" className="text-blue-600 hover:underline">Browse jobs</a> to save them here
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="border-dashed dark:bg-slate-800">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4">
+                        <Bookmark className="h-6 w-6 text-slate-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">No saved jobs</h3>
+                      <p className="text-slate-500 dark:text-slate-400 mb-4">
+                        Jobs you save will appear here for easy access.
                       </p>
-                    </div>
-                  )}
+                      <Button onClick={() => navigate('/jobs')} variant="outline">
+                        Browse Jobs
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
                 </CardContent>
               </Card>
-            )}
+            ) : activeTab === 'applied-jobs' ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Applied Jobs</h1>
+                    <p className="text-slate-600 dark:text-slate-400 mt-1">Track the status of your applications</p>
+                  </div>
+                </div>
+
+                {profile.applications && profile.applications.length > 0 ? (
+                  <div className="grid gap-4">
+                    {profile.applications.map((application) => (
+                      <Card key={application.id} className="hover:shadow-md transition-shadow dark:bg-slate-800 cursor-pointer" onClick={() => navigate(`/jobs/${application.job.id}`)}>
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start">
+                            <div className="flex gap-4">
+                              <div>
+                                <h3 className="font-semibold text-lg text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                                  {application.job.title}
+                                </h3>
+                                <p className="text-slate-600 dark:text-slate-400">{application.job.company?.name}</p>
+                                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-4 w-4" />
+                                    Applied {new Date(application.appliedAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              application.status === 'ACCEPTED' 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : application.status === 'REJECTED'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            }`}>
+                              {application.status.charAt(0) + application.status.slice(1).toLowerCase()}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="border-dashed dark:bg-slate-800">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4">
+                        <Briefcase className="h-6 w-6 text-slate-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">No applications yet</h3>
+                      <p className="text-slate-500 dark:text-slate-400 mb-4">
+                        Start applying to jobs to see them here.
+                      </p>
+                      <Button onClick={() => navigate('/jobs')} variant="outline">
+                        Browse Jobs
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
-    </div>
+      </div>
     </div>
   );
 };

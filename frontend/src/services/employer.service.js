@@ -86,6 +86,22 @@ export const employerService = {
       throw error.response?.data || error.message;
     }
   },
+  deleteApplication: async (applicationId) => {
+    try {
+      const response = await api.delete(`/employer/applications/${applicationId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+  getDashboardStats: async () => {
+    try {
+      const response = await api.get('/employer/stats');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
 };
 
 export default employerService;

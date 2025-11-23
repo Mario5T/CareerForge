@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
@@ -15,7 +15,9 @@ import {
   XCircle,
   Clock,
   Download,
+  User,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 import employerService from '../../services/employer.service';
 
@@ -75,6 +77,33 @@ const JobApplicants = () => {
       toast({
         title: 'Error',
         description: error.message || 'Failed to update application status',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handleDelete = async (applicationId) => {
+    if (!window.confirm('Are you sure you want to delete this application? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setUpdating(applicationId);
+      await employerService.deleteApplication(applicationId);
+      
+      toast({
+        title: 'Success',
+        description: 'Application deleted successfully',
+      });
+
+      // Update local state
+      setApplicants(applicants.filter((app) => app.id !== applicationId));
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete application',
         variant: 'destructive',
       });
     } finally {
@@ -233,23 +262,19 @@ const JobApplicants = () => {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-2 md:w-auto w-full">
-                    {applicant.applicant?.resume && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="w-full"
-                      >
-                        <a
-                          href={applicant.applicant.resume}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download Resume
-                        </a>
-                      </Button>
-                    )}
+
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="w-full"
+                    >
+                      <Link to={`/public/user/${applicant.applicant?.id}`} target="_blank">
+                        <User className="h-4 w-4 mr-2" />
+                        View Profile
+                      </Link>
+                    </Button>
 
                     {applicant.status === 'PENDING' && (
                       <>
@@ -307,22 +332,38 @@ const JobApplicants = () => {
                     )}
 
                     {applicant.status === 'REJECTED' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          handleStatusUpdate(applicant.id, 'PENDING')
-                        }
-                        disabled={updating === applicant.id}
-                        className="w-full"
-                      >
-                        {updating === applicant.id ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Clock className="h-4 w-4 mr-2" />
-                        )}
-                        Reconsider
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleStatusUpdate(applicant.id, 'PENDING')
+                          }
+                          disabled={updating === applicant.id}
+                          className="w-full"
+                        >
+                          {updating === applicant.id ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Clock className="h-4 w-4 mr-2" />
+                          )}
+                          Reconsider
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDelete(applicant.id)}
+                          disabled={updating === applicant.id}
+                          className="w-full"
+                        >
+                          {updating === applicant.id ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4 mr-2" />
+                          )}
+                          Delete
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
