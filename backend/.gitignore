@@ -31,4 +31,4 @@ dist/
 build/
 
 # Prisma
-
+prisma/migrations/
