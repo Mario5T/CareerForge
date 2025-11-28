@@ -86,26 +86,29 @@ const Profile = () => {
             savedJobs: [],
           });
 
-          // Fetch saved jobs separately
-          try {
-            const savedJobsResponse = await api.get('/users/saved-jobs');
-            setProfile(prev => ({
-              ...prev,
-              savedJobs: Array.isArray(savedJobsResponse.data) ? savedJobsResponse.data : []
-            }));
-          } catch (error) {
-            console.error('Error fetching saved jobs:', error);
-          }
+          // Fetch saved jobs and applications only for job seekers (not employers or recruiters)
+          if (user?.role !== 'COMPANY' && user?.role !== 'RECRUITER') {
+            // Fetch saved jobs separately
+            try {
+              const savedJobsResponse = await api.get('/users/saved-jobs');
+              setProfile(prev => ({
+                ...prev,
+                savedJobs: Array.isArray(savedJobsResponse.data) ? savedJobsResponse.data : []
+              }));
+            } catch (error) {
+              console.error('Error fetching saved jobs:', error);
+            }
 
-          // Fetch applications
-          try {
-            const applicationsResponse = await jobService.getMyApplications();
-            setProfile(prev => ({
-              ...prev,
-              applications: Array.isArray(applicationsResponse.data) ? applicationsResponse.data : []
-            }));
-          } catch (error) {
-            console.error('Error fetching applications:', error);
+            // Fetch applications
+            try {
+              const applicationsResponse = await jobService.getMyApplications();
+              setProfile(prev => ({
+                ...prev,
+                applications: Array.isArray(applicationsResponse.data) ? applicationsResponse.data : []
+              }));
+            } catch (error) {
+              console.error('Error fetching applications:', error);
+            }
           }
         } catch (error) {
           console.error('Error fetching profile:', error);
@@ -463,8 +466,8 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="w-full px-6 py-6">
         {/* Header */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Sidebar Navigation */}
@@ -481,26 +484,31 @@ const Profile = () => {
                   <User className="h-5 w-5" />
                   My Profile
                 </button>
-                <button
-                  onClick={() => setActiveTab('saved-jobs')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'saved-jobs'
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
-                    }`}
-                >
-                  <Bookmark className="h-5 w-5" />
-                  Saved Jobs
-                </button>
-                <button
-                  onClick={() => setActiveTab('applied-jobs')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'applied-jobs'
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
-                    }`}
-                >
-                  <Briefcase className="h-5 w-5" />
-                  Applied Jobs
-                </button>
+                {/* Only show Saved Jobs and Applied Jobs for job seekers (not employers or recruiters) */}
+                {user?.role !== 'COMPANY' && user?.role !== 'RECRUITER' && (
+                  <>
+                    <button
+                      onClick={() => setActiveTab('saved-jobs')}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'saved-jobs'
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        }`}
+                    >
+                      <Bookmark className="h-5 w-5" />
+                      Saved Jobs
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('applied-jobs')}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'applied-jobs'
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        }`}
+                    >
+                      <Briefcase className="h-5 w-5" />
+                      Applied Jobs
+                    </button>
+                  </>
+                )}
               </div>
             </Card>
           </div>
