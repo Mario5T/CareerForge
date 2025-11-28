@@ -625,617 +625,625 @@ const Profile = () => {
                   </CardContent>
                 </Card>
 
-                {/* Skills Card */}
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
-                  <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
-                    <CardTitle className="text-xl text-slate-900 dark:text-white">Skills & Expertise</CardTitle>
-                    <CardDescription>
-                      Add skills that highlight your professional capabilities
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      {/* Display selected skills as badges */}
-                      <div className="flex flex-wrap gap-2">
-                        {profile.skills.length > 0 ? (
-                          profile.skills.map((skill, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900 dark:to-blue-800 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full text-sm font-medium border border-blue-200 dark:border-blue-700 shadow-sm"
-                            >
-                              <span>{skill}</span>
-                              {isEditing && (
-                                <button
-                                  onClick={() => removeSkill(index)}
-                                  className="hover:text-blue-600 cursor-pointer transition-colors"
-                                >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              )}
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-slate-500 dark:text-slate-400 text-sm">No skills added yet</p>
+                {/* Skills Card - Hidden for employers */}
+                {user?.role !== 'COMPANY' && user?.role !== 'RECRUITER' && (
+                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
+                    <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
+                      <CardTitle className="text-xl text-slate-900 dark:text-white">Skills & Expertise</CardTitle>
+                      <CardDescription>
+                        Add skills that highlight your professional capabilities
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        {/* Display selected skills as badges */}
+                        <div className="flex flex-wrap gap-2">
+                          {profile.skills.length > 0 ? (
+                            profile.skills.map((skill, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900 dark:to-blue-800 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full text-sm font-medium border border-blue-200 dark:border-blue-700 shadow-sm"
+                              >
+                                <span>{skill}</span>
+                                {isEditing && (
+                                  <button
+                                    onClick={() => removeSkill(index)}
+                                    className="hover:text-blue-600 cursor-pointer transition-colors"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-slate-500 dark:text-slate-400 text-sm">No skills added yet</p>
+                          )}
+                        </div>
+
+                        {/* Skill search dropdown */}
+                        {isEditing && (
+                          <div className="relative">
+                            <Input
+                              type="text"
+                              placeholder="Search and add skills..."
+                              value={skillSearch}
+                              onChange={(e) => {
+                                setSkillSearch(e.target.value);
+                                setShowSkillDropdown(true);
+                              }}
+                              onFocus={() => setShowSkillDropdown(true)}
+                              className="w-full border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                            />
+
+                            {/* Dropdown list */}
+                            {showSkillDropdown && skillSearch && filteredSkills.length > 0 && (
+                              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                                {filteredSkills.slice(0, 10).map((skill) => (
+                                  <button
+                                    key={skill}
+                                    onClick={() => addSkillFromDropdown(skill)}
+                                    className="w-full text-left px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors text-slate-700 dark:text-slate-300"
+                                  >
+                                    {skill}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
-
-                      {/* Skill search dropdown */}
-                      {isEditing && (
-                        <div className="relative">
-                          <Input
-                            type="text"
-                            placeholder="Search and add skills..."
-                            value={skillSearch}
-                            onChange={(e) => {
-                              setSkillSearch(e.target.value);
-                              setShowSkillDropdown(true);
-                            }}
-                            onFocus={() => setShowSkillDropdown(true)}
-                            className="w-full border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                          />
-
-                          {/* Dropdown list */}
-                          {showSkillDropdown && skillSearch && filteredSkills.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
-                              {filteredSkills.slice(0, 10).map((skill) => (
-                                <button
-                                  key={skill}
-                                  onClick={() => addSkillFromDropdown(skill)}
-                                  className="w-full text-left px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors text-slate-700 dark:text-slate-300"
-                                >
-                                  {skill}
-                                </button>
-                              ))}
-                            </div>
-                          )}
+                    </CardContent>
+                  </Card>
+                )}
+                {/* Work Experience Card - Hidden for employers */}
+                {user?.role !== 'COMPANY' && user?.role !== 'RECRUITER' && (
+                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
+                    <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-xl text-slate-900 dark:text-white">Work Experience</CardTitle>
+                          <CardDescription>
+                            Showcase your professional background and achievements
+                          </CardDescription>
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                {/* Work Experience Card */}
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
-                  <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-xl text-slate-900 dark:text-white">Work Experience</CardTitle>
-                        <CardDescription>
-                          Showcase your professional background and achievements
-                        </CardDescription>
+                        {isEditing && !showExperienceForm && (
+                          <Button
+                            onClick={() => setShowExperienceForm(true)}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add Experience
+                          </Button>
+                        )}
                       </div>
-                      {isEditing && !showExperienceForm && (
-                        <Button
-                          onClick={() => setShowExperienceForm(true)}
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Experience
-                        </Button>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    {showExperienceForm && (
-                      <div className="mb-6 p-6 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                          {editingExperienceId ? 'Edit Experience' : 'Add New Experience'}
-                        </h3>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Job Title *</Label>
-                              <Input
-                                value={experienceForm.jobTitle}
-                                onChange={(e) => setExperienceForm({ ...experienceForm, jobTitle: e.target.value })}
-                                placeholder="e.g., Senior Developer"
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      {showExperienceForm && (
+                        <div className="mb-6 p-6 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                            {editingExperienceId ? 'Edit Experience' : 'Add New Experience'}
+                          </h3>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Job Title *</Label>
+                                <Input
+                                  value={experienceForm.jobTitle}
+                                  onChange={(e) => setExperienceForm({ ...experienceForm, jobTitle: e.target.value })}
+                                  placeholder="e.g., Senior Developer"
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Company Name *</Label>
+                                <Input
+                                  value={experienceForm.company}
+                                  onChange={(e) => setExperienceForm({ ...experienceForm, company: e.target.value })}
+                                  placeholder="e.g., Tech Corp"
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Company Name *</Label>
-                              <Input
-                                value={experienceForm.company}
-                                onChange={(e) => setExperienceForm({ ...experienceForm, company: e.target.value })}
-                                placeholder="e.g., Tech Corp"
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                          </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Location</Label>
+                                <Input
+                                  value={experienceForm.location}
+                                  onChange={(e) => setExperienceForm({ ...experienceForm, location: e.target.value })}
+                                  placeholder="e.g., San Francisco, CA"
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Employment Type</Label>
+                                <select
+                                  value={experienceForm.employmentType}
+                                  onChange={(e) => setExperienceForm({ ...experienceForm, employmentType: e.target.value })}
+                                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-md focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-slate-600 text-slate-900 dark:text-white"
+                                >
+                                  <option>Full-time</option>
+                                  <option>Part-time</option>
+                                  <option>Internship</option>
+                                  <option>Contract</option>
+                                  <option>Freelance</option>
+                                  <option>Remote</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Start Date *</Label>
+                                <Input
+                                  type="month"
+                                  value={experienceForm.startDate}
+                                  onChange={(e) => setExperienceForm({ ...experienceForm, startDate: e.target.value })}
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">End Date</Label>
+                                <Input
+                                  type="month"
+                                  value={experienceForm.endDate}
+                                  onChange={(e) => setExperienceForm({ ...experienceForm, endDate: e.target.value })}
+                                  disabled={experienceForm.currentlyWorking}
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id="currentlyWorking"
+                                checked={experienceForm.currentlyWorking}
+                                onChange={(e) => setExperienceForm({ ...experienceForm, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : experienceForm.endDate })}
+                                className="rounded border-slate-300"
+                              />
+                              <Label htmlFor="currentlyWorking" className="text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
+                                I currently work here
+                              </Label>
+                            </div>
+
                             <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Location</Label>
-                              <Input
-                                value={experienceForm.location}
-                                onChange={(e) => setExperienceForm({ ...experienceForm, location: e.target.value })}
-                                placeholder="e.g., San Francisco, CA"
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Description</Label>
+                              <Textarea
+                                value={experienceForm.description}
+                                onChange={(e) => setExperienceForm({ ...experienceForm, description: e.target.value })}
+                                placeholder="Describe your responsibilities and achievements..."
+                                rows={3}
+                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500 resize-none"
                               />
                             </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Employment Type</Label>
-                              <select
-                                value={experienceForm.employmentType}
-                                onChange={(e) => setExperienceForm({ ...experienceForm, employmentType: e.target.value })}
-                                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-md focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-slate-600 text-slate-900 dark:text-white"
+
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={handleAddExperience}
+                                className="bg-blue-600 hover:bg-blue-700"
                               >
-                                <option>Full-time</option>
-                                <option>Part-time</option>
-                                <option>Internship</option>
-                                <option>Contract</option>
-                                <option>Freelance</option>
-                                <option>Remote</option>
-                              </select>
+                                {editingExperienceId ? 'Update Experience' : 'Add Experience'}
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  setShowExperienceForm(false);
+                                  setEditingExperienceId(null);
+                                  setExperienceForm({
+                                    jobTitle: '',
+                                    company: '',
+                                    location: '',
+                                    employmentType: 'Full-time',
+                                    startDate: '',
+                                    endDate: '',
+                                    currentlyWorking: false,
+                                    description: '',
+                                    skillsUsed: [],
+                                    certificate: null,
+                                  });
+                                }}
+                                variant="outline"
+                              >
+                                Cancel
+                              </Button>
                             </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Start Date *</Label>
-                              <Input
-                                type="month"
-                                value={experienceForm.startDate}
-                                onChange={(e) => setExperienceForm({ ...experienceForm, startDate: e.target.value })}
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">End Date</Label>
-                              <Input
-                                type="month"
-                                value={experienceForm.endDate}
-                                onChange={(e) => setExperienceForm({ ...experienceForm, endDate: e.target.value })}
-                                disabled={experienceForm.currentlyWorking}
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              id="currentlyWorking"
-                              checked={experienceForm.currentlyWorking}
-                              onChange={(e) => setExperienceForm({ ...experienceForm, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : experienceForm.endDate })}
-                              className="rounded border-slate-300"
-                            />
-                            <Label htmlFor="currentlyWorking" className="text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
-                              I currently work here
-                            </Label>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-slate-700 dark:text-slate-300 font-medium">Description</Label>
-                            <Textarea
-                              value={experienceForm.description}
-                              onChange={(e) => setExperienceForm({ ...experienceForm, description: e.target.value })}
-                              placeholder="Describe your responsibilities and achievements..."
-                              rows={3}
-                              className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500 resize-none"
-                            />
-                          </div>
-
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={handleAddExperience}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              {editingExperienceId ? 'Update Experience' : 'Add Experience'}
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                setShowExperienceForm(false);
-                                setEditingExperienceId(null);
-                                setExperienceForm({
-                                  jobTitle: '',
-                                  company: '',
-                                  location: '',
-                                  employmentType: 'Full-time',
-                                  startDate: '',
-                                  endDate: '',
-                                  currentlyWorking: false,
-                                  description: '',
-                                  skillsUsed: [],
-                                  certificate: null,
-                                });
-                              }}
-                              variant="outline"
-                            >
-                              Cancel
-                            </Button>
                           </div>
                         </div>
-                      </div>
-                    )}
-
-                    {profile.experience.length > 0 ? (
-                      <div className="space-y-4">
-                        {profile.experience.map((exp) => (
-                          <div key={exp.id} className="p-4 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-slate-300 dark:hover:border-slate-500 transition-colors">
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold text-slate-900 dark:text-white">{exp.jobTitle}</h4>
-                                <p className="text-slate-600 dark:text-slate-400 font-medium">{exp.company}</p>
-                                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
-                                  {exp.location && (
-                                    <div className="flex items-center gap-1">
-                                      <MapPin className="h-4 w-4" />
-                                      {exp.location}
-                                    </div>
-                                  )}
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="h-4 w-4" />
-                                    {exp.startDate} {exp.currentlyWorking ? '- Present' : exp.endDate ? `- ${exp.endDate}` : ''}
-                                  </div>
-                                  <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium">
-                                    {exp.employmentType}
-                                  </span>
-                                </div>
-                              </div>
-                              {isEditing && (
-                                <div className="flex gap-2">
-                                  <Button
-                                    onClick={() => handleEditExperience(exp)}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  >
-                                    <Edit2 className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    onClick={() => handleDeleteExperience(exp.id)}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                            {exp.description && (
-                              <p className="text-slate-600 dark:text-slate-400 text-sm mt-3">{exp.description}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <Briefcase className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                        <p className="text-slate-500 dark:text-slate-400 font-medium">Your work experience will appear here</p>
-                        <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Add your first experience to get started</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Education Card */}
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
-                  <CardHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-xl text-slate-900 dark:text-white">Education</CardTitle>
-                        <CardDescription>
-                          Add your educational background and qualifications
-                        </CardDescription>
-                      </div>
-                      {isEditing && !showEducationForm && (
-                        <Button
-                          onClick={() => setShowEducationForm(true)}
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Education
-                        </Button>
                       )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    {showEducationForm && (
-                      <div className="mb-6 p-6 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                          {editingEducationId ? 'Edit Education' : 'Add New Education'}
-                        </h3>
+
+                      {profile.experience.length > 0 ? (
                         <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Degree *</Label>
-                              <Input
-                                value={educationForm.degree}
-                                onChange={(e) => setEducationForm({ ...educationForm, degree: e.target.value })}
-                                placeholder="e.g., Bachelor of Science"
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">University / College *</Label>
-                              <Input
-                                value={educationForm.university}
-                                onChange={(e) => setEducationForm({ ...educationForm, university: e.target.value })}
-                                placeholder="e.g., Stanford University"
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Field of Study</Label>
-                              <Input
-                                value={educationForm.fieldOfStudy}
-                                onChange={(e) => setEducationForm({ ...educationForm, fieldOfStudy: e.target.value })}
-                                placeholder="e.g., Computer Science"
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Grade / CGPA (Optional)</Label>
-                              <Input
-                                value={educationForm.grade}
-                                onChange={(e) => setEducationForm({ ...educationForm, grade: e.target.value })}
-                                placeholder="e.g., 3.8"
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Start Year *</Label>
-                              <Input
-                                type="number"
-                                value={educationForm.startYear}
-                                onChange={(e) => setEducationForm({ ...educationForm, startYear: e.target.value })}
-                                placeholder="e.g., 2020"
-                                min="1900"
-                                max={new Date().getFullYear()}
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-700 dark:text-slate-300 font-medium">End Year</Label>
-                              <Input
-                                type="number"
-                                value={educationForm.endYear}
-                                onChange={(e) => setEducationForm({ ...educationForm, endYear: e.target.value })}
-                                placeholder="e.g., 2024"
-                                disabled={educationForm.isPresent}
-                                min="1900"
-                                max={new Date().getFullYear() + 10}
-                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              id="isPresent"
-                              checked={educationForm.isPresent}
-                              onChange={(e) => setEducationForm({ ...educationForm, isPresent: e.target.checked, endYear: e.target.checked ? '' : educationForm.endYear })}
-                              className="rounded border-slate-300"
-                            />
-                            <Label htmlFor="isPresent" className="text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
-                              I currently study here
-                            </Label>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-slate-700 dark:text-slate-300 font-medium">Description (Optional)</Label>
-                            <Textarea
-                              value={educationForm.description}
-                              onChange={(e) => setEducationForm({ ...educationForm, description: e.target.value })}
-                              placeholder="Add any additional details about your education..."
-                              rows={3}
-                              className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500 resize-none"
-                            />
-                          </div>
-
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={handleAddEducation}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              {editingEducationId ? 'Update Education' : 'Add Education'}
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                setShowEducationForm(false);
-                                setEditingEducationId(null);
-                                setEducationForm({
-                                  degree: '',
-                                  university: '',
-                                  fieldOfStudy: '',
-                                  startYear: '',
-                                  endYear: '',
-                                  isPresent: false,
-                                  grade: '',
-                                  description: '',
-                                  certificate: null,
-                                });
-                              }}
-                              variant="outline"
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {profile.education.length > 0 ? (
-                      <div className="space-y-4">
-                        {profile.education.map((edu) => (
-                          <div key={edu.id} className="p-4 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-slate-300 dark:hover:border-slate-500 transition-colors">
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold text-slate-900 dark:text-white">{edu.degree}</h4>
-                                <p className="text-slate-600 dark:text-slate-400 font-medium">{edu.university}</p>
-                                {edu.fieldOfStudy && (
-                                  <p className="text-slate-500 dark:text-slate-400 text-sm">{edu.fieldOfStudy}</p>
-                                )}
-                                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="h-4 w-4" />
-                                    {edu.startYear} {edu.isPresent ? '- Present' : edu.endYear ? `- ${edu.endYear}` : ''}
-                                  </div>
-                                  {edu.grade && (
-                                    <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-xs font-medium">
-                                      CGPA: {edu.grade}
+                          {profile.experience.map((exp) => (
+                            <div key={exp.id} className="p-4 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-slate-300 dark:hover:border-slate-500 transition-colors">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <h4 className="text-lg font-semibold text-slate-900 dark:text-white">{exp.jobTitle}</h4>
+                                  <p className="text-slate-600 dark:text-slate-400 font-medium">{exp.company}</p>
+                                  <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
+                                    {exp.location && (
+                                      <div className="flex items-center gap-1">
+                                        <MapPin className="h-4 w-4" />
+                                        {exp.location}
+                                      </div>
+                                    )}
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      {exp.startDate} {exp.currentlyWorking ? '- Present' : exp.endDate ? `- ${exp.endDate}` : ''}
+                                    </div>
+                                    <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium">
+                                      {exp.employmentType}
                                     </span>
-                                  )}
+                                  </div>
                                 </div>
+                                {isEditing && (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      onClick={() => handleEditExperience(exp)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                    >
+                                      <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      onClick={() => handleDeleteExperience(exp.id)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
                               </div>
-                              {isEditing && (
-                                <div className="flex gap-2">
-                                  <Button
-                                    onClick={() => handleEditEducation(edu)}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  >
-                                    <Edit2 className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    onClick={() => handleDeleteEducation(edu.id)}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
+                              {exp.description && (
+                                <p className="text-slate-600 dark:text-slate-400 text-sm mt-3">{exp.description}</p>
                               )}
                             </div>
-                            {edu.description && (
-                              <p className="text-slate-600 dark:text-slate-400 text-sm mt-3">{edu.description}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <Briefcase className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                        <p className="text-slate-500 dark:text-slate-400 font-medium">Your education details will appear here</p>
-                        <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Add your first education to get started</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Resume Card */}
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
-                  <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
-                    <CardTitle className="text-xl text-slate-900 dark:text-white">Resume</CardTitle>
-                    <CardDescription>
-                      Upload your resume to share with employers
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      {profile.resume ? (
-                        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                              <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
-                                {profile.resumeOriginalName || 'My Resume'}
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Uploaded resume
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={`http://localhost:5001/${profile.resume}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 rounded-full transition-colors"
-                              title="Download Resume"
-                            >
-                              <Download className="h-5 w-5" />
-                            </a>
-                            {isEditing && (
-                              <div className="flex gap-2">
-                                <div className="relative">
-                                  <input
-                                    type="file"
-                                    id="resume-update"
-                                    className="hidden"
-                                    accept=".pdf,.doc,.docx"
-                                    onChange={handleResumeUpload}
-                                    disabled={isLoading}
-                                  />
-                                  <label
-                                    htmlFor="resume-update"
-                                    className={`p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 rounded-full transition-colors cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    title="Update Resume"
-                                  >
-                                    <Edit2 className="h-5 w-5" />
-                                  </label>
-                                </div>
-                                <button
-                                  onClick={handleResumeDelete}
-                                  disabled={isLoading}
-                                  className="p-2 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
-                                  title="Remove Resume"
-                                >
-                                  <Trash2 className="h-5 w-5" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                          ))}
                         </div>
                       ) : (
-                        <div className="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-lg">
-                          <div className="mx-auto w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">
-                            <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
-                          </div>
-                          <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-1">
-                            Upload your resume
-                          </h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                            PDF, DOC, DOCX up to 5MB
-                          </p>
-                          {isEditing ? (
-                            <div className="relative inline-block">
-                              <input
-                                type="file"
-                                id="resume-upload"
-                                className="hidden"
-                                accept=".pdf,.doc,.docx"
-                                onChange={handleResumeUpload}
-                                disabled={isLoading}
-                              />
-                              <label
-                                htmlFor="resume-upload"
-                                className={`inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              >
-                                <Plus className="h-4 w-4" />
-                                Select File
-                              </label>
-                            </div>
-                          ) : (
-                            <Button
-                              onClick={() => setIsEditing(true)}
-                              variant="outline"
-                              size="sm"
-                            >
-                              Edit Profile to Upload
-                            </Button>
-                          )}
+                        <div className="text-center py-12">
+                          <Briefcase className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                          <p className="text-slate-500 dark:text-slate-400 font-medium">Your work experience will appear here</p>
+                          <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Add your first experience to get started</p>
                         </div>
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Education Card - Hidden for employers */}
+                {user?.role !== 'COMPANY' && user?.role !== 'RECRUITER' && (
+                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
+                    <CardHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-xl text-slate-900 dark:text-white">Education</CardTitle>
+                          <CardDescription>
+                            Add your educational background and qualifications
+                          </CardDescription>
+                        </div>
+                        {isEditing && !showEducationForm && (
+                          <Button
+                            onClick={() => setShowEducationForm(true)}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add Education
+                          </Button>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      {showEducationForm && (
+                        <div className="mb-6 p-6 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                            {editingEducationId ? 'Edit Education' : 'Add New Education'}
+                          </h3>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Degree *</Label>
+                                <Input
+                                  value={educationForm.degree}
+                                  onChange={(e) => setEducationForm({ ...educationForm, degree: e.target.value })}
+                                  placeholder="e.g., Bachelor of Science"
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">University / College *</Label>
+                                <Input
+                                  value={educationForm.university}
+                                  onChange={(e) => setEducationForm({ ...educationForm, university: e.target.value })}
+                                  placeholder="e.g., Stanford University"
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Field of Study</Label>
+                                <Input
+                                  value={educationForm.fieldOfStudy}
+                                  onChange={(e) => setEducationForm({ ...educationForm, fieldOfStudy: e.target.value })}
+                                  placeholder="e.g., Computer Science"
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Grade / CGPA (Optional)</Label>
+                                <Input
+                                  value={educationForm.grade}
+                                  onChange={(e) => setEducationForm({ ...educationForm, grade: e.target.value })}
+                                  placeholder="e.g., 3.8"
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">Start Year *</Label>
+                                <Input
+                                  type="number"
+                                  value={educationForm.startYear}
+                                  onChange={(e) => setEducationForm({ ...educationForm, startYear: e.target.value })}
+                                  placeholder="e.g., 2020"
+                                  min="1900"
+                                  max={new Date().getFullYear()}
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-slate-700 dark:text-slate-300 font-medium">End Year</Label>
+                                <Input
+                                  type="number"
+                                  value={educationForm.endYear}
+                                  onChange={(e) => setEducationForm({ ...educationForm, endYear: e.target.value })}
+                                  placeholder="e.g., 2024"
+                                  disabled={educationForm.isPresent}
+                                  min="1900"
+                                  max={new Date().getFullYear() + 10}
+                                  className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id="isPresent"
+                                checked={educationForm.isPresent}
+                                onChange={(e) => setEducationForm({ ...educationForm, isPresent: e.target.checked, endYear: e.target.checked ? '' : educationForm.endYear })}
+                                className="rounded border-slate-300"
+                              />
+                              <Label htmlFor="isPresent" className="text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
+                                I currently study here
+                              </Label>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-slate-700 dark:text-slate-300 font-medium">Description (Optional)</Label>
+                              <Textarea
+                                value={educationForm.description}
+                                onChange={(e) => setEducationForm({ ...educationForm, description: e.target.value })}
+                                placeholder="Add any additional details about your education..."
+                                rows={3}
+                                className="border-slate-200 dark:border-slate-600 dark:bg-slate-600 dark:text-white focus:border-blue-500 focus:ring-blue-500 resize-none"
+                              />
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={handleAddEducation}
+                                className="bg-blue-600 hover:bg-blue-700"
+                              >
+                                {editingEducationId ? 'Update Education' : 'Add Education'}
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  setShowEducationForm(false);
+                                  setEditingEducationId(null);
+                                  setEducationForm({
+                                    degree: '',
+                                    university: '',
+                                    fieldOfStudy: '',
+                                    startYear: '',
+                                    endYear: '',
+                                    isPresent: false,
+                                    grade: '',
+                                    description: '',
+                                    certificate: null,
+                                  });
+                                }}
+                                variant="outline"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {profile.education.length > 0 ? (
+                        <div className="space-y-4">
+                          {profile.education.map((edu) => (
+                            <div key={edu.id} className="p-4 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-slate-300 dark:hover:border-slate-500 transition-colors">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <h4 className="text-lg font-semibold text-slate-900 dark:text-white">{edu.degree}</h4>
+                                  <p className="text-slate-600 dark:text-slate-400 font-medium">{edu.university}</p>
+                                  {edu.fieldOfStudy && (
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm">{edu.fieldOfStudy}</p>
+                                  )}
+                                  <div className="flex items-center gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      {edu.startYear} {edu.isPresent ? '- Present' : edu.endYear ? `- ${edu.endYear}` : ''}
+                                    </div>
+                                    {edu.grade && (
+                                      <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-xs font-medium">
+                                        CGPA: {edu.grade}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                {isEditing && (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      onClick={() => handleEditEducation(edu)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                    >
+                                      <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      onClick={() => handleDeleteEducation(edu.id)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                              {edu.description && (
+                                <p className="text-slate-600 dark:text-slate-400 text-sm mt-3">{edu.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <Briefcase className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                          <p className="text-slate-500 dark:text-slate-400 font-medium">Your education details will appear here</p>
+                          <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Add your first education to get started</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Resume Card - Hidden for employers */}
+                {user?.role !== 'COMPANY' && user?.role !== 'RECRUITER' && (
+                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
+                    <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
+                      <CardTitle className="text-xl text-slate-900 dark:text-white">Resume</CardTitle>
+                      <CardDescription>
+                        Upload your resume to share with employers
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        {profile.resume ? (
+                          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                                <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                                  {profile.resumeOriginalName || 'My Resume'}
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                  Uploaded resume
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={`http://localhost:5001/${profile.resume}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 rounded-full transition-colors"
+                                title="Download Resume"
+                              >
+                                <Download className="h-5 w-5" />
+                              </a>
+                              {isEditing && (
+                                <div className="flex gap-2">
+                                  <div className="relative">
+                                    <input
+                                      type="file"
+                                      id="resume-update"
+                                      className="hidden"
+                                      accept=".pdf,.doc,.docx"
+                                      onChange={handleResumeUpload}
+                                      disabled={isLoading}
+                                    />
+                                    <label
+                                      htmlFor="resume-update"
+                                      className={`p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 rounded-full transition-colors cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                      title="Update Resume"
+                                    >
+                                      <Edit2 className="h-5 w-5" />
+                                    </label>
+                                  </div>
+                                  <button
+                                    onClick={handleResumeDelete}
+                                    disabled={isLoading}
+                                    className="p-2 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
+                                    title="Remove Resume"
+                                  >
+                                    <Trash2 className="h-5 w-5" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-lg">
+                            <div className="mx-auto w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">
+                              <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+                            </div>
+                            <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-1">
+                              Upload your resume
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                              PDF, DOC, DOCX up to 5MB
+                            </p>
+                            {isEditing ? (
+                              <div className="relative inline-block">
+                                <input
+                                  type="file"
+                                  id="resume-upload"
+                                  className="hidden"
+                                  accept=".pdf,.doc,.docx"
+                                  onChange={handleResumeUpload}
+                                  disabled={isLoading}
+                                />
+                                <label
+                                  htmlFor="resume-upload"
+                                  className={`inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                  Select File
+                                </label>
+                              </div>
+                            ) : (
+                              <Button
+                                onClick={() => setIsEditing(true)}
+                                variant="outline"
+                                size="sm"
+                              >
+                                Edit Profile to Upload
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </>
             ) : activeTab === 'saved-jobs' ? (
               /* Saved Jobs Card */
