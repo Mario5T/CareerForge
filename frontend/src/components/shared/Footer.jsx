@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from '../../store/slices/auth/authSlice';
 
 const Footer = () => {
+  const user = useSelector(selectCurrentUser);
   return (
     <footer className="bg-gray-800 text-white py-8">
       <div className="container mx-auto px-4">
@@ -9,22 +12,36 @@ const Footer = () => {
             <h3 className="text-xl font-bold mb-4">CareerForge</h3>
             <p className="text-gray-400">Find your dream job or the perfect candidate with our platform.</p>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">For Job Seekers</h4>
-            <ul className="space-y-2">
-              <li><Link to="/jobs" className="text-gray-400 hover:text-white">Browse Jobs</Link></li>
-              <li><Link to="/companies" className="text-gray-400 hover:text-white">Companies</Link></li>
-              <li><Link to="/profile" className="text-gray-400 hover:text-white">My Profile</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">For Employers</h4>
-            <ul className="space-y-2">
-              <li><Link to="/dashboard" className="text-gray-400 hover:text-white">Post a Job</Link></li>
-              <li><Link to="/dashboard/applicants" className="text-gray-400 hover:text-white">View Applicants</Link></li>
-              <li><Link to="/dashboard/company" className="text-gray-400 hover:text-white">Company Profile</Link></li>
-            </ul>
-          </div>
+          {(!user || (user.role !== 'COMPANY' && user.role !== 'RECRUITER')) && (
+            <div>
+              <h4 className="font-semibold mb-4">For Job Seekers</h4>
+              <ul className="space-y-2">
+                <li><Link to="/jobs" className="text-gray-400 hover:text-white">Browse Jobs</Link></li>
+                <li><Link to="/companies" className="text-gray-400 hover:text-white">Companies</Link></li>
+                <li><Link to="/profile" className="text-gray-400 hover:text-white">My Profile</Link></li>
+              </ul>
+            </div>
+          )}
+          {user?.role === 'COMPANY' && (
+            <div>
+              <h4 className="font-semibold mb-4">For Company</h4>
+              <ul className="space-y-2">
+                <li><Link to="/company/profile" className="text-gray-400 hover:text-white">Company Profile</Link></li>
+                <li><Link to="/company/recruiters" className="text-gray-400 hover:text-white">Manage Recruiters</Link></li>
+                <li><Link to="/company/jobs" className="text-gray-400 hover:text-white">Manage Jobs</Link></li>
+              </ul>
+            </div>
+          )}
+          {(!user || user?.role === 'RECRUITER') && (
+            <div>
+              <h4 className="font-semibold mb-4">For Employers</h4>
+              <ul className="space-y-2">
+                <li><Link to="/dashboard" className="text-gray-400 hover:text-white">Post a Job</Link></li>
+                <li><Link to="/dashboard/applicants" className="text-gray-400 hover:text-white">View Applicants</Link></li>
+                <li><Link to="/dashboard/company" className="text-gray-400 hover:text-white">Company Profile</Link></li>
+              </ul>
+            </div>
+          )}
           <div>
             <h4 className="font-semibold mb-4">Legal</h4>
             <ul className="space-y-2">

@@ -84,7 +84,7 @@ const Login = () => {
             id="password"
             name="password"
             type="password"
-            placeholder="••••••••"
+            placeholder="Enter your password"
             value={password}
             onChange={handleChange}
             required
