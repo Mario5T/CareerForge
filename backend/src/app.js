@@ -22,31 +22,30 @@ app.use(helmet());
 const { NODE_ENV } = require('./config/env');
 
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://192.168.128.122:3000',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:3000'
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://192.168.128.122:3000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3000",
+  "https://career-forge-3e9smiqjz-shreyas-sarkars-projects.vercel.app"
 ];
 
 const corsOptions = {
   credentials: true,
-};
-
-if (NODE_ENV === 'production') {
-  corsOptions.origin = function (origin, callback) {
+  origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
-  };
-} else {
-  corsOptions.origin = true;
-}
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Preflight fix
 
 app.use(
   session({
@@ -54,8 +53,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', 
-      maxAge: 24 * 60 * 60 * 1000, 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000,
     },
   })
 );
