@@ -9,8 +9,9 @@ import { useToast } from '../../components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import api from '../../services/api';
 import jobService from '../../services/job.service';
+import employerService from '../../services/employer.service';
 import { PREDEFINED_SKILLS } from '../../constants/skills';
-import { X, Plus, Trash2, Edit2, Calendar, MapPin, Briefcase, FileText, Upload, Download, User, Bookmark, DollarSign } from 'lucide-react';
+import { X, Plus, Trash2, Edit2, Calendar, MapPin, Briefcase, FileText, Upload, Download, User, Bookmark, DollarSign, Building2 } from 'lucide-react';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -66,6 +67,7 @@ const Profile = () => {
 
   const [skillSearch, setSkillSearch] = useState('');
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
+  const [companyData, setCompanyData] = useState(null);
   useEffect(() => {
     const fetchProfile = async () => {
       if (user?.id) {
@@ -108,6 +110,22 @@ const Profile = () => {
               }));
             } catch (error) {
               console.error('Error fetching applications:', error);
+            }
+          }
+
+          // Fetch company data for recruiters
+          if (user?.role === 'RECRUITER' || user?.role === 'COMPANY') {
+            try {
+              const companyResponse = await employerService.getMyCompany();
+              if (companyResponse.data?.company) {
+                setCompanyData({
+                  title: companyResponse.data.title || '',
+                  department: companyResponse.data.department || '',
+                  ...companyResponse.data.company
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching company data:', error);
             }
           }
         } catch (error) {
@@ -624,6 +642,125 @@ const Profile = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Company Information Card - Only for Recruiters/Company */}
+                {(user?.role === 'RECRUITER' || user?.role === 'COMPANY') && companyData && (
+                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-800">
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-700 border-b dark:border-slate-600">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-xl text-slate-900 dark:text-white flex items-center gap-2">
+                            <Building2 className="h-5 w-5" />
+                            Company Information
+                          </CardTitle>
+                          <CardDescription>
+                            Your company affiliation and role
+                          </CardDescription>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate('/employer/profile')}
+                        >
+                          Edit Company Profile
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        {/* Company Logo and Name */}
+                        <div className="flex items-start gap-4">
+                          {companyData.logo && (
+                            <div className="flex-shrink-0">
+                              <img
+                                src={companyData.logo}
+                                alt={`${companyData.name} logo`}
+                                className="w-16 h-16 object-contain border-2 border-slate-200 dark:border-slate-600 rounded-lg bg-white"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+                              {companyData.name}
+                            </h3>
+                            {companyData.description && (
+                              <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                                {companyData.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Your Role */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                          <div>
+                            <Label className="text-slate-600 dark:text-slate-400 text-xs">Your Role</Label>
+                            <p className="text-slate-900 dark:text-white font-medium">{companyData.title}</p>
+                          </div>
+                          <div>
+                            <Label className="text-slate-600 dark:text-slate-400 text-xs">Department</Label>
+                            <p className="text-slate-900 dark:text-white font-medium">{companyData.department}</p>
+                          </div>
+                        </div>
+
+                        {/* Company Details */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {companyData.location && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                              <div>
+                                <Label className="text-slate-600 dark:text-slate-400 text-xs">Location</Label>
+                                <p className="text-slate-900 dark:text-white text-sm">{companyData.location}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {companyData.industry && (
+                            <div className="flex items-center gap-2">
+                              <Briefcase className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                              <div>
+                                <Label className="text-slate-600 dark:text-slate-400 text-xs">Industry</Label>
+                                <p className="text-slate-900 dark:text-white text-sm">{companyData.industry}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {companyData.companySize && (
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                              <div>
+                                <Label className="text-slate-600 dark:text-slate-400 text-xs">Company Size</Label>
+                                <p className="text-slate-900 dark:text-white text-sm">
+                                  {companyData.companySize.replace('SIZE_', '').replace('_', '-').replace('PLUS', '+').toLowerCase()} employees
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {companyData.website && (
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                              <div>
+                                <Label className="text-slate-600 dark:text-slate-400 text-xs">Website</Label>
+                                <a
+                                  href={companyData.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                                >
+                                  Visit Website
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Skills Card - Hidden for employers */}
                 {user?.role !== 'COMPANY' && user?.role !== 'RECRUITER' && (

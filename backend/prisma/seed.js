@@ -153,6 +153,8 @@ async function main() {
     data: {
       userId: recruiter1.id,
       companyId: techCorp.id,
+      title: 'Senior Talent Acquisition Specialist',
+      department: 'Human Resources',
     },
   });
 
@@ -160,6 +162,8 @@ async function main() {
     data: {
       userId: recruiter2.id,
       companyId: innovateLabs.id,
+      title: 'HR Manager',
+      department: 'People Operations',
     },
   });
 

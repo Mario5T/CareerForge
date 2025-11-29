@@ -7,7 +7,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { useToast } from '../../components/ui/use-toast';
-import { Users, AlertCircle, CheckCircle2, Loader2, RefreshCw } from 'lucide-react';
+import { Users, AlertCircle, CheckCircle2, Loader2, RefreshCw, Building2, MapPin, Users2, Globe, Briefcase } from 'lucide-react';
 import employerService from '../../services/employer.service';
 import { selectCurrentUser } from '../../store/slices/auth/authSlice';
 
@@ -108,7 +108,7 @@ const EmployerProfile = () => {
 
     try {
       console.log('📤 Submitting employer profile data:', formData);
-      
+
       let response;
       if (hasProfile) {
         console.log('🔄 Updating existing profile...');
@@ -190,6 +190,37 @@ const EmployerProfile = () => {
         </div>
       </div>
 
+      {/* Current Role & Department Display - Only show if profile exists */}
+      {hasProfile && (formData.title || formData.department) && (
+        <Card className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-900">
+              <Users className="w-5 h-5" />
+              Your Current Role
+            </CardTitle>
+            <CardDescription>
+              Your position and department within the company
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {formData.title && (
+                <div className="space-y-1">
+                  <Label className="text-green-700 text-xs font-medium">Job Title</Label>
+                  <p className="text-green-900 font-semibold text-lg">{formData.title}</p>
+                </div>
+              )}
+              {formData.department && (
+                <div className="space-y-1">
+                  <Label className="text-green-700 text-xs font-medium">Department</Label>
+                  <p className="text-green-900 font-semibold text-lg">{formData.department}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Employer Profile Form */}
       <Card>
         <CardHeader>
@@ -202,9 +233,12 @@ const EmployerProfile = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Employer Information Section */}
+            {/* Personal Information Section */}
             <div className="space-y-6 pb-6 border-b">
-              <h3 className="text-lg font-semibold">Your Information</h3>
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold">Personal Information</h3>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -235,7 +269,10 @@ const EmployerProfile = () => {
 
             {/* Company Information Section */}
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold">Company Information</h3>
+              <div className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold">Company Information</h3>
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="companyName">Company Name *</Label>
@@ -384,7 +421,7 @@ const EmployerProfile = () => {
         </CardHeader>
         <CardContent className="text-sm text-blue-800">
           <p>
-            Your employer profile helps candidates learn more about you and your company. 
+            Your employer profile helps candidates learn more about you and your company.
             This information will be displayed on job postings and your company profile page.
           </p>
         </CardContent>
