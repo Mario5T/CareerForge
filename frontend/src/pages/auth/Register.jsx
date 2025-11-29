@@ -101,7 +101,7 @@ const Register = () => {
             id="password"
             name="password"
             type="password"
-            placeholder="••••••••"
+            placeholder="Create a password"
             value={password}
             onChange={handleChange}
             required
@@ -114,7 +114,7 @@ const Register = () => {
             id="confirmPassword"
             name="confirmPassword"
             type="password"
-            placeholder="••••••••"
+            placeholder="Confirm your password"
             value={confirmPassword}
             onChange={handleChange}
             required

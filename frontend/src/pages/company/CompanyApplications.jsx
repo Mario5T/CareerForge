@@ -408,17 +408,7 @@ const CompanyApplications = () => {
                       View Profile
                     </Button>
                     
-                    {application.applicant?.resume && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(application.applicant.resume, '_blank')}
-                        className="w-full"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download Resume
-                      </Button>
-                    )}
+
 
                     
 

@@ -18,11 +18,12 @@ const Navbar = () => {
   // Fetch company logo for COMPANY role users
   useEffect(() => {
     const fetchCompanyLogo = async () => {
-      if (user?.role === 'COMPANY') {
+      if (user?.role === 'COMPANY' || user?.role === 'company') {
         try {
           const response = await companyService.getMyCompany();
-          if (response.data.hasCompany && response.data.company?.logo) {
-            setCompanyLogo(response.data.company.logo);
+          const data = response.data || response;
+          if (data?.hasCompany && data?.company?.logo) {
+            setCompanyLogo(data.company.logo);
           } else {
             setCompanyLogo(null);
           }
@@ -115,6 +116,10 @@ const Navbar = () => {
                     src={getAvatarSrc()}
                     alt={user?.name || "User"}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://github.com/shadcn.png";
+                    }}
                   />
                 </div>
               </PopoverTrigger>
@@ -126,6 +131,10 @@ const Navbar = () => {
                         src={getAvatarSrc()}
                         alt={user?.name || "User"}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://github.com/shadcn.png";
+                        }}
                       />
                     </div>
                     <div>

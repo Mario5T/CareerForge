@@ -90,7 +90,7 @@ const PublicProfile = () => {
                   <a href={`mailto:${profile.email}`}>Contact</a>
                 </Button>
               )}
-              {profile.resume && (
+              {profile.resume && currentUser?.role !== 'COMPANY' && (
                 <Button variant="outline" onClick={() => window.open(profile.resume, '_blank')}>
                   <Download className="h-4 w-4 mr-2" /> Resume
                 </Button>
