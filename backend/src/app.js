@@ -27,7 +27,7 @@ const allowedOrigins = [
   "http://192.168.128.122:3000",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:3000",
-  "https://career-forge-5jzbx9539-shreyas-sarkars-projects.vercel.app"
+  "https://career-forge-sigma.vercel.app"
 ];
 
 const corsOptions = {
