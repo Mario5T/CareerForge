@@ -10,7 +10,7 @@ const groq = new Groq({
 
 let documentationContext = '';
 try {
-  const docPath = path.join(__dirname, '../../../../WEBSITE_DOCUMENTATION.md');
+  const docPath = path.join(__dirname, '../../WEBSITE_DOCUMENTATION.md');
   
   if (fs.existsSync(docPath)) {
     documentationContext = fs.readFileSync(docPath, 'utf-8');
