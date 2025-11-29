@@ -6,14 +6,12 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting seed...');
 
-  // Clear existing data
   await prisma.application.deleteMany();
   await prisma.job.deleteMany();
   await prisma.employer.deleteMany();
   await prisma.company.deleteMany();
   await prisma.user.deleteMany();
 
-  // Create users
   const hashedPassword = await bcrypt.hash('password123', 10);
 
   const adminUser = await prisma.user.create({
@@ -27,7 +25,6 @@ async function main() {
     },
   });
 
-  // Create COMPANY role users (company owners)
   const companyOwner1 = await prisma.user.create({
     data: {
       name: 'Michael TechCorp CEO',
@@ -61,7 +58,7 @@ async function main() {
     },
   });
 
-  // Create RECRUITER role users
+
   const recruiter1 = await prisma.user.create({
     data: {
       name: 'John Recruiter',
@@ -110,7 +107,6 @@ async function main() {
 
   console.log('✅ Users created');
 
-  // Create companies with owners
   const techCorp = await prisma.company.create({
     data: {
       name: 'TechCorp Inc.',
@@ -152,7 +148,7 @@ async function main() {
 
   console.log('✅ Companies created');
 
-  // Create employers (link recruiters to companies)
+
   const employer1 = await prisma.employer.create({
     data: {
       userId: recruiter1.id,
@@ -169,7 +165,7 @@ async function main() {
 
   console.log('✅ Employers created');
 
-  // Create jobs
+
   const job1 = await prisma.job.create({
     data: {
       title: 'Senior Full Stack Developer',
@@ -524,7 +520,7 @@ async function main() {
 
   console.log('✅ Jobs created');
 
-  // Create some applications
+
   await prisma.application.create({
     data: {
       jobId: job1.id,
