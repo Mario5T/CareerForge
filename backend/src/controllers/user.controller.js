@@ -12,7 +12,6 @@ exports.registerUser=async(req,res)=>{
   try{
     const {name,email,password,role}=req.body;
     
-    // Validate role - USER, RECRUITER, or COMPANY allowed during signup (not ADMIN)
     const allowedRoles = ['USER', 'RECRUITER', 'COMPANY'];
     const userRole = role && allowedRoles.includes(role) ? role : 'USER';
     
@@ -24,10 +23,8 @@ exports.registerUser=async(req,res)=>{
       data:{name,email,password:hashedPassword,role:userRole}
     });
 
-    // Generate token immediately after registration
     const token=jwt.sign({id:user.id,role:user.role},JWT_SECRET,{expiresIn:JWT_EXPIRE});
     
-    // Don't send password back
     const {password:_,...userWithoutPassword} = user;
 
     res.status(201).json({
@@ -47,7 +44,6 @@ exports.loginUser=async(req,res)=>{
     const user=await prisma.user.findUnique({where:{email}});
     if(!user) return res.status(400).json({message:"Invalid credentials"});
 
-    // Check if user has a password (not OAuth-only account)
     if(!user.password) return res.status(400).json({message:"Please login with Google"});
 
     const isMatch=await bcrypt.compare(password,user.password);
@@ -55,7 +51,6 @@ exports.loginUser=async(req,res)=>{
 
     const token=jwt.sign({id:user.id,role:user.role},JWT_SECRET,{expiresIn:JWT_EXPIRE});
     
-    // Don't send password back
     const {password:_,...userWithoutPassword} = user;
     
     res.json({token,user:userWithoutPassword});
@@ -88,13 +83,11 @@ exports.updateProfile=async(req,res)=>{
   try{
     const { experience, education, ...profileData } = req.body;
     
-    // Update user profile
     const updated = await prisma.user.update({
       where: { id: req.user.id },
       data: profileData,
     });
 
-    // Handle work experience updates
     if (experience && Array.isArray(experience)) {
       const existingExp = await prisma.workExperience.findMany({
         where: { userId: req.user.id },
@@ -102,14 +95,12 @@ exports.updateProfile=async(req,res)=>{
       const existingIds = new Set(existingExp.map(e => e.id));
       const incomingIds = new Set(experience.filter(e => e.id).map(e => e.id));
 
-      // Delete removed experiences
       for (const exp of existingExp) {
         if (!incomingIds.has(exp.id)) {
           await prisma.workExperience.delete({ where: { id: exp.id } });
         }
       }
 
-      // Create or update experiences
       for (const exp of experience) {
         if (exp.id && existingIds.has(exp.id)) {
           await prisma.workExperience.update({
@@ -145,7 +136,6 @@ exports.updateProfile=async(req,res)=>{
       }
     }
 
-    // Handle education updates
     if (education && Array.isArray(education)) {
       const existingEdu = await prisma.education.findMany({
         where: { userId: req.user.id },
@@ -153,14 +143,12 @@ exports.updateProfile=async(req,res)=>{
       const existingIds = new Set(existingEdu.map(e => e.id));
       const incomingIds = new Set(education.filter(e => e.id).map(e => e.id));
 
-      // Delete removed education
       for (const edu of existingEdu) {
         if (!incomingIds.has(edu.id)) {
           await prisma.education.delete({ where: { id: edu.id } });
         }
       }
 
-      // Create or update education
       for (const edu of education) {
         if (edu.id && existingIds.has(edu.id)) {
           await prisma.education.update({
@@ -194,7 +182,6 @@ exports.updateProfile=async(req,res)=>{
       }
     }
 
-    // Fetch updated user with all relations
     const finalUser = await prisma.user.findUnique({
       where: { id: req.user.id },
       include: {
@@ -230,7 +217,6 @@ exports.getUserPublic = async (req, res) => {
     if(!user){
       return res.status(404).json({ message: 'User not found' });
     }
-    // Exclude sensitive fields but keep resume and contact info for public profile
     const { password, googleId, provider, ...publicProfile } = user;
     res.json(publicProfile);
   }catch(err){
@@ -261,7 +247,6 @@ exports.uploadResume = async (req, res) => {
     });
   } catch (err) {
     console.error('Resume upload error:', err);
-    // Delete file if database update fails
     if (req.file) {
       fs.unlink(req.file.path, (unlinkErr) => {
         if (unlinkErr) console.error('Error deleting file after failed update:', unlinkErr);
@@ -278,7 +263,6 @@ exports.deleteResume = async (req, res) => {
     });
 
     if (user.resume) {
-      // Try to delete file from filesystem
       fs.unlink(user.resume, (err) => {
         if (err) console.error('Error deleting resume file:', err);
       });
@@ -304,7 +288,6 @@ exports.saveJob = async (req, res) => {
     const jobId = req.params.jobId;
     const userId = req.user.id;
 
-    // Check if job exists
     const job = await prisma.job.findUnique({
       where: { id: jobId }
     });
@@ -313,7 +296,6 @@ exports.saveJob = async (req, res) => {
       return res.status(404).json({ message: 'Job not found' });
     }
 
-    // Check if already saved
     const userWithSavedJob = await prisma.user.findFirst({
       where: {
         id: userId,

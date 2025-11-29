@@ -145,7 +145,6 @@ exports.getMyJobs = async (userId) => {
   });
   if (!employer) throw new AppError('Employer profile not found', 404);
 
-  // Only return jobs created by the current user
   const jobs = await prisma.job.findMany({
     where: {
       createdById: userId,
@@ -168,7 +167,6 @@ exports.getApplicantsForJob = async (jobId, userId) => {
 
   if (!job) throw new AppError('Job not found', 404);
 
-  // Check if user created this job
   if (job.createdById !== userId) throw new AppError('Not authorized to view applicants for this job', 403);
 
   const applications = await prisma.application.findMany({

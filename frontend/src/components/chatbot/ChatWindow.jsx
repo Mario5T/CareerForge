@@ -11,7 +11,6 @@ const ChatWindow = ({ open, onClose }) => {
   const [loading, setLoading] = useState(false);
   const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading]);
 
-  // Focus input when opening
   useEffect(() => {
     if (open) {
       const t = setTimeout(() => inputRef.current?.focus(), 50);
@@ -19,7 +18,6 @@ const ChatWindow = ({ open, onClose }) => {
     }
   }, [open]);
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -29,7 +27,6 @@ const ChatWindow = ({ open, onClose }) => {
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  // Click outside to close
   useEffect(() => {
     if (!open) return;
     const onClick = (e) => {

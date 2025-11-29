@@ -26,7 +26,6 @@ const Home = () => {
         const response = await fetch('http://localhost:5001/api/v1/jobs');
         if (!response.ok) throw new Error('Failed to fetch jobs');
         const data = await response.json();
-        // Get first 6 jobs for featured section
         setFeaturedJobs((data.data || []).slice(0, 6));
       } catch (err) {
         console.error('Error fetching featured jobs:', err);
@@ -39,7 +38,6 @@ const Home = () => {
     fetchFeaturedJobs();
   }, []);
 
-  // Fetch user profile if logged in
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user?.id && user?.role === 'USER') {
@@ -58,7 +56,6 @@ const Home = () => {
     fetchUserProfile();
   }, [user?.id, user?.role]);
 
-  // Fetch and calculate recommended jobs based on user skills
   useEffect(() => {
     const fetchRecommendedJobs = async () => {
       if (user?.id && user?.role === 'USER' && userProfile?.skills && userProfile.skills.length > 0) {
@@ -68,13 +65,11 @@ const Home = () => {
           if (!response.ok) throw new Error('Failed to fetch jobs');
           const data = await response.json();
           
-          // Calculate match score for each job
           const jobsWithMatch = (data.data || []).map(job => ({
             ...job,
             matchScore: calculateSkillMatch(userProfile.skills, job.requirements || [], job.description || '')
           }));
           
-          // Filter jobs with at least some match and sort by match score (highest first)
           const recommended = jobsWithMatch
             .filter(job => job.matchScore > 0)
             .sort((a, b) => b.matchScore - a.matchScore)
@@ -106,7 +101,6 @@ const Home = () => {
     return `Up to ${formatter.format(max)}`;
   };
 
-  // Calculate skill match percentage between user skills and job requirements
   const calculateSkillMatch = (userSkills = [], jobRequirements = [], jobDescription = '') => {
     if (!userSkills || userSkills.length === 0) return 0;
     
@@ -116,11 +110,9 @@ const Home = () => {
     
     let matches = 0;
     userSkillsLower.forEach(skill => {
-      // Check if skill is in requirements
       if (jobReqsLower.some(req => req.includes(skill) || skill.includes(req))) {
         matches++;
       }
-      // Also check in description
       else if (descriptionLower.includes(skill)) {
         matches++;
       }
@@ -187,7 +179,6 @@ const Home = () => {
     };
   }, [user?.role, user?.id]);
 
-  // Company Dashboard View
   if (user?.role === 'COMPANY') {
     const { activeJobs, totalApplications, recruiters, profileCompletion } = companyStats;
     return (
@@ -317,7 +308,6 @@ const Home = () => {
     );
   }
 
-  // Regular Home Page for non-company users
   return (
     <div className="container mx-auto px-4 py-12 animate-in fade-in-0 duration-300">
       <div className="text-center">

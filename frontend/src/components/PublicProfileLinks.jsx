@@ -5,7 +5,6 @@ import { Badge } from './ui/badge';
 import { User, Users, Building2, ExternalLink } from 'lucide-react';
 
 const PublicProfileLinks = () => {
-  // Example data - in a real app, this would come from props or API
   const exampleProfiles = {
     user: {
       id: 'user123',

@@ -1,5 +1,4 @@
 export const PREDEFINED_SKILLS = [
-  // Programming Languages
   'Python',
   'JavaScript',
   'TypeScript',
@@ -34,7 +33,6 @@ export const PREDEFINED_SKILLS = [
   'PL/SQL',
   'T-SQL',
 
-  // Frontend Frameworks & Libraries
   'React',
   'Vue.js',
   'Angular',
@@ -52,7 +50,6 @@ export const PREDEFINED_SKILLS = [
   'Qwik',
   'Solid.js',
 
-  // Backend Frameworks
   'Node.js',
   'Express',
   'Django',
@@ -80,7 +77,6 @@ export const PREDEFINED_SKILLS = [
   'Loopback',
   'Sails.js',
 
-  // Mobile Development
   'React Native',
   'Flutter',
   'Ionic',
@@ -90,7 +86,6 @@ export const PREDEFINED_SKILLS = [
   'Progressive Web Apps',
   'PWA',
 
-  // Styling & UI
   'Tailwind CSS',
   'Bootstrap',
   'Material UI',
@@ -110,7 +105,6 @@ export const PREDEFINED_SKILLS = [
   'Babylon.js',
   'Cesium.js',
 
-  // State Management
   'Redux',
   'Zustand',
   'Jotai',
@@ -122,7 +116,6 @@ export const PREDEFINED_SKILLS = [
   'NgRx',
   'Akita',
 
-  // Testing
   'Jest',
   'Vitest',
   'Mocha',
@@ -141,7 +134,6 @@ export const PREDEFINED_SKILLS = [
   'TDD',
   'BDD',
 
-  // Databases
   'PostgreSQL',
   'MySQL',
   'MongoDB',
@@ -167,7 +159,6 @@ export const PREDEFINED_SKILLS = [
   'Mongoose',
   'Realm',
 
-  // Cloud Platforms
   'AWS',
   'Amazon EC2',
   'Amazon S3',
@@ -196,7 +187,6 @@ export const PREDEFINED_SKILLS = [
   'Render',
   'Fly.io',
 
-  // DevOps & Infrastructure
   'Docker',
   'Docker Compose',
   'Kubernetes',
@@ -228,7 +218,6 @@ export const PREDEFINED_SKILLS = [
   'VMware',
   'Vagrant',
 
-  // Message Queues & Event Streaming
   'Kafka',
   'RabbitMQ',
   'Apache ActiveMQ',
@@ -240,7 +229,6 @@ export const PREDEFINED_SKILLS = [
   'NATS',
   'ZeroMQ',
 
-  // Search & Analytics
   'Elasticsearch',
   'Solr',
   'Algolia',
@@ -255,7 +243,6 @@ export const PREDEFINED_SKILLS = [
   'Looker',
   'Metabase',
 
-  // API & Integration
   'REST API',
   'GraphQL',
   'Apollo',
@@ -273,7 +260,6 @@ export const PREDEFINED_SKILLS = [
   'IFTTT',
   'Webhooks',
 
-  // Data Science & ML
   'Machine Learning',
   'Deep Learning',
   'TensorFlow',
@@ -305,7 +291,6 @@ export const PREDEFINED_SKILLS = [
   'RAG',
   'Fine-tuning',
 
-  // Version Control
   'Git',
   'Git and Github',
   'GitHub',
@@ -315,7 +300,6 @@ export const PREDEFINED_SKILLS = [
   'Mercurial',
   'SVN',
 
-  // Code Quality & Linting
   'ESLint',
   'Prettier',
   'SonarQube',
@@ -328,7 +312,6 @@ export const PREDEFINED_SKILLS = [
   'Husky',
   'Pre-commit Hooks',
 
-  // Build Tools & Package Managers
   'Webpack',
   'Vite',
   'Parcel',
@@ -348,7 +331,6 @@ export const PREDEFINED_SKILLS = [
   'Composer',
   'Bundler',
 
-  // Documentation
   'Storybook',
   'Docusaurus',
   'MkDocs',
@@ -360,7 +342,6 @@ export const PREDEFINED_SKILLS = [
   'TypeDoc',
   'Documentation Writing',
 
-  // Design Tools
   'Figma',
   'Adobe XD',
   'Sketch',
@@ -376,7 +357,6 @@ export const PREDEFINED_SKILLS = [
   'Wireframing',
   'Prototyping',
 
-  // Project Management
   'Jira',
   'Asana',
   'Monday.com',
@@ -391,7 +371,6 @@ export const PREDEFINED_SKILLS = [
   'Kanban',
   'Lean',
 
-  // Monitoring & Logging
   'Prometheus',
   'Grafana',
   'Jaeger',
@@ -405,7 +384,6 @@ export const PREDEFINED_SKILLS = [
   'CloudWatch',
   'Stack Driver',
 
-  // Soft Skills
   'Communication Skills',
   'Leadership',
   'Team Management',
@@ -434,7 +412,6 @@ export const PREDEFINED_SKILLS = [
   'Customer Service',
   'Empathy',
 
-  // Business & Soft Skills
   'Product Management',
   'Business Analysis',
   'Entrepreneurship',
@@ -453,7 +430,6 @@ export const PREDEFINED_SKILLS = [
   'Data Analysis',
   'Research',
 
-  // Architecture & Design Patterns
   'Microservices',
   'Monolithic Architecture',
   'Event-Driven Architecture',
@@ -467,7 +443,6 @@ export const PREDEFINED_SKILLS = [
   'CQRS',
   'Event Sourcing',
 
-  // Security
   'Security',
   'Cybersecurity',
   'Application Security',
@@ -484,7 +459,6 @@ export const PREDEFINED_SKILLS = [
   'SAML',
   'Two-Factor Authentication',
 
-  // Operating Systems
   'Linux',
   'Windows',
   'macOS',
@@ -497,7 +471,6 @@ export const PREDEFINED_SKILLS = [
   'iOS',
   'Android',
 
-  // Miscellaneous
   'Concurrency',
   'Parallelism',
   'Performance Optimization',

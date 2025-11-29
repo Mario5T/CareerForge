@@ -68,7 +68,6 @@ export const companyService = {
     }
   },
 
-  // COMPANY role: Manage own company
   getMyCompany: async () => {
     try {
       const response = await api.get('/companies/my-company/profile');

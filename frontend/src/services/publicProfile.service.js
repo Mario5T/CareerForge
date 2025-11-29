@@ -1,7 +1,6 @@
 import api from './api';
 
 const publicProfileService = {
-  // Get public user profile by ID
   getPublicUserProfile: async (userId) => {
     try {
       const response = await api.get(`/users/${userId}`);
@@ -11,7 +10,6 @@ const publicProfileService = {
     }
   },
 
-  // Get public recruiter profile by ID (recruiters are users with RECRUITER role)
   getPublicRecruiterProfile: async (recruiterId) => {
     try {
       const response = await api.get(`/users/${recruiterId}`);
@@ -21,18 +19,15 @@ const publicProfileService = {
     }
   },
 
-  // Get public company profile by ID
   getPublicCompanyProfile: async (companyId) => {
     try {
       const response = await api.get(`/companies/${companyId}`);
-      // Company API returns data wrapped in { success: true, data: {...} }
       return response.data.data || response.data;
     } catch (error) {
       throw error.response?.data || error.message;
     }
   },
 
-  // Search public profiles (optional utility)
   searchPublicProfiles: async (query, type = 'all') => {
     try {
       const response = await api.get('/public/profiles/search', {

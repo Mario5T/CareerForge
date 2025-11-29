@@ -92,7 +92,6 @@ const JobDetails = () => {
         const response = await jobService.getJobById(id);
         setJob(response.data);
         
-        // Fetch related jobs (same company or similar type)
         try {
           const allJobsResponse = await jobService.getAllJobs();
           const related = (allJobsResponse.data || []).filter(
@@ -104,7 +103,6 @@ const JobDetails = () => {
         }
         
         if (isAuthenticated) {
-          // Check if job is saved
           try {
             const savedJobsResponse = await api.get('/users/saved-jobs');
             const savedJobIds = new Set(savedJobsResponse.data.map(j => j.id));
@@ -113,7 +111,6 @@ const JobDetails = () => {
             console.error('Error checking saved status:', err);
           }
 
-          // Check if already applied
           try {
             const applicationsResponse = await jobService.getMyApplications();
             const appliedJobIds = new Set(applicationsResponse.data.map(app => app.jobId));
@@ -136,8 +133,6 @@ const JobDetails = () => {
     };
 
     fetchJob();
-    // We intentionally only depend on `id` here to avoid re-running
-    // when the `toast` function identity changes on each render.
   }, [id, isAuthenticated]);
 
   const handleApply = async () => {

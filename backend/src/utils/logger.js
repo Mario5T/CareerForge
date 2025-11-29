@@ -35,7 +35,6 @@ const format = winston.format.combine(
   )
 );
 
-// Ensure logs directory exists
 const logDir = path.join(__dirname, '../../logs');
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });

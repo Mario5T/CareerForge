@@ -29,13 +29,11 @@ const EditJob = () => {
 
   useEffect(() => {
     fetchJobDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   const fetchJobDetails = async () => {
     try {
       setLoading(true);
-      // We need to fetch the job details - using getApplicantsForJob to get job data
       const response = await employerService.getApplicantsForJob(jobId);
       const job = response.data.job;
 
@@ -79,7 +77,6 @@ const EditJob = () => {
     setSaving(true);
 
     try {
-      // Convert requirements from string to array
       const requirements = formData.requirements
         .split('\n')
         .filter(req => req.trim() !== '');

@@ -88,9 +88,7 @@ const Profile = () => {
             savedJobs: [],
           });
 
-          // Fetch saved jobs and applications only for job seekers (not employers or recruiters)
           if (user?.role !== 'COMPANY' && user?.role !== 'RECRUITER') {
-            // Fetch saved jobs separately
             try {
               const savedJobsResponse = await api.get('/users/saved-jobs');
               setProfile(prev => ({
@@ -101,7 +99,6 @@ const Profile = () => {
               console.error('Error fetching saved jobs:', error);
             }
 
-            // Fetch applications
             try {
               const applicationsResponse = await jobService.getMyApplications();
               setProfile(prev => ({
@@ -113,7 +110,6 @@ const Profile = () => {
             }
           }
 
-          // Fetch company data for recruiters
           if (user?.role === 'RECRUITER' || user?.role === 'COMPANY') {
             try {
               const companyResponse = await employerService.getMyCompany();
@@ -130,7 +126,6 @@ const Profile = () => {
           }
         } catch (error) {
           console.error('Error fetching profile:', error);
-          // Fallback to user data from auth
           setProfile({
             name: user.name || '',
             email: user.email || '',
@@ -210,7 +205,6 @@ const Profile = () => {
         education: profile.education,
       });
 
-      // Update profile with response data
       if (response.data && response.data.user) {
         setProfile({
           name: response.data.user.name || '',
@@ -377,7 +371,6 @@ const Profile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (file.type !== 'application/pdf' &&
       file.type !== 'application/msword' &&
       file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
@@ -389,7 +382,6 @@ const Profile = () => {
       return;
     }
 
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: 'Error',

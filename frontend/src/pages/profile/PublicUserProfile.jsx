@@ -109,7 +109,6 @@ const PublicUserProfile = () => {
                       if (profile.resume.startsWith('http')) return profile.resume;
                       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
                       const BASE_URL = API_URL.replace('/api/v1', '');
-                      // Ensure no double slashes if path starts with /
                       const cleanPath = profile.resume.startsWith('/') ? profile.resume.slice(1) : profile.resume;
                       return `${BASE_URL}/${cleanPath}`;
                     })()} 

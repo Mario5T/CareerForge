@@ -17,7 +17,6 @@ const CompanyDetails = () => {
       try {
         setLoading(true);
         const res = await companyService.getCompanyById(id);
-        // API returns { success, message, data }
         setCompany(res.data);
       } catch (err) {
         setError(typeof err === 'string' ? err : err?.error || 'Failed to load company');

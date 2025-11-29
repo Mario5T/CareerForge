@@ -15,7 +15,6 @@ const errorHandler = (err, req, res, next) => {
   error.message = err.message;
   error.statusCode = err.statusCode || 500;
 
-  // Log error
   logger.error(`Error: ${error.message}`, {
     statusCode: error.statusCode,
     stack: err.stack,
@@ -23,7 +22,6 @@ const errorHandler = (err, req, res, next) => {
     method: req.method,
   });
 
-  // Prisma errors
   if (err.code === 'P2002') {
     error.message = 'Duplicate field value entered';
     error.statusCode = 400;
@@ -39,7 +37,6 @@ const errorHandler = (err, req, res, next) => {
     error.statusCode = 400;
   }
 
-  // JWT errors
   if (err.name === 'JsonWebTokenError') {
     error.message = 'Invalid token';
     error.statusCode = 401;
@@ -50,7 +47,6 @@ const errorHandler = (err, req, res, next) => {
     error.statusCode = 401;
   }
 
-  // Validation errors
   if (err.name === 'ValidationError') {
     error.message = Object.values(err.errors)
       .map((e) => e.message)

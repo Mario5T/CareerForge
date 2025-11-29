@@ -7,7 +7,6 @@ import { Search } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import useDebounce from '../hooks/useDebounce';
 
-// ✅ BEST PRACTICE: Memoized search results item
 const SearchResultItem = React.memo(({ item, onSelect }) => {
   return (
     <Card className="mb-2 hover:shadow-md transition-shadow cursor-pointer" onClick={() => onSelect(item)}>
@@ -27,11 +26,9 @@ const OptimizedSearchExample = () => {
   const [allItems, setAllItems] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // ✅ BEST PRACTICE: Separate immediate input and final query states
   const [inputValue, setInputValue] = useState(searchParams.get('q') || '');
   const debouncedQuery = useDebounce(inputValue, 300);
   
-  // ✅ BEST PRACTICE: Use useCallback for event handlers to prevent unnecessary re-renders
   const handleInputChange = useCallback((e) => {
     setInputValue(e.target.value);
   }, []);
@@ -45,10 +42,8 @@ const OptimizedSearchExample = () => {
 
   const handleItemSelect = useCallback((item) => {
     console.log('Selected item:', item);
-    // Handle item selection
   }, []);
 
-  // ✅ BEST PRACTICE: Use useMemo for expensive filtering operations
   const filteredItems = useMemo(() => {
     if (!debouncedQuery.trim()) return allItems;
     
@@ -60,14 +55,12 @@ const OptimizedSearchExample = () => {
     );
   }, [allItems, debouncedQuery]);
 
-  // ✅ BEST PRACTICE: Memoize pagination calculations
   const paginationData = useMemo(() => {
     const itemsPerPage = 10;
     const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
     return { itemsPerPage, totalPages };
   }, [filteredItems]);
 
-  // Simulate data fetching
   useEffect(() => {
     const mockData = [
       { id: 1, title: 'Senior React Developer', company: 'TechCorp', location: 'San Francisco' },

@@ -40,12 +40,10 @@ const CompanyApplications = () => {
     }
 
     fetchCompanyApplications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.role]);
 
   useEffect(() => {
     filterApplications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, statusFilter, jobFilter, applications]);
 
   const fetchCompanyApplications = async () => {
@@ -65,7 +63,6 @@ const CompanyApplications = () => {
 
       setCompany(response.data.company);
       
-      // Flatten all applications from all jobs
       const allApplications = [];
       if (response.data.company.jobs) {
         response.data.company.jobs.forEach(job => {
@@ -83,7 +80,6 @@ const CompanyApplications = () => {
         });
       }
 
-      // Sort by date (newest first)
       allApplications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setApplications(allApplications);
       setFilteredApplications(allApplications);
@@ -105,7 +101,6 @@ const CompanyApplications = () => {
   const filterApplications = () => {
     let filtered = [...applications];
 
-    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(app => 
@@ -115,12 +110,10 @@ const CompanyApplications = () => {
       );
     }
 
-    // Status filter
     if (statusFilter !== 'ALL') {
       filtered = filtered.filter(app => app.status === statusFilter);
     }
 
-    // Job filter
     if (jobFilter !== 'ALL') {
       filtered = filtered.filter(app => app.jobId === jobFilter);
     }

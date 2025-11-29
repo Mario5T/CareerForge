@@ -33,7 +33,6 @@ const JobApplicants = () => {
 
   useEffect(() => {
     fetchApplicants();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   const fetchApplicants = async () => {
@@ -67,7 +66,6 @@ const JobApplicants = () => {
         description: `Application ${newStatus.toLowerCase()} successfully`,
       });
 
-      // Update local state
       setApplicants(
         applicants.map((app) =>
           app.id === applicationId ? { ...app, status: newStatus } : app
@@ -98,7 +96,6 @@ const JobApplicants = () => {
         description: 'Application deleted successfully',
       });
 
-      // Update local state
       setApplicants(applicants.filter((app) => app.id !== applicationId));
     } catch (error) {
       toast({

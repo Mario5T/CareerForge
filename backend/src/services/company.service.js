@@ -3,7 +3,6 @@ const { AppError } = require('../utils/errorHandler');
 exports.createCompany = async (companyData, ownerId) => {
   const { name, description, website, location, logo, industry, companySize } = companyData;
 
-  // Check if owner already has a company
   const existingOwned = await prisma.company.findFirst({
     where: { ownerId },
   });
@@ -304,7 +303,6 @@ exports.getCompanyEmployers = async (companyId) => {
   return employers;
 };
 
-// Get company by owner ID (for COMPANY role users)
 exports.getCompanyByOwnerId = async (ownerId) => {
   const company = await prisma.company.findFirst({
     where: { ownerId },
@@ -391,7 +389,6 @@ exports.getCompanyByOwnerId = async (ownerId) => {
   return company;
 };
 
-// Update company by owner
 exports.updateCompanyByOwner = async (ownerId, updateData) => {
   const company = await prisma.company.findFirst({
     where: { ownerId },
@@ -401,7 +398,6 @@ exports.updateCompanyByOwner = async (ownerId, updateData) => {
     throw new AppError('Company not found or you do not own any company', 404);
   }
 
-  // Check if updating name and it conflicts
   if (updateData.name && updateData.name !== company.name) {
     const existingCompany = await prisma.company.findUnique({
       where: { name: updateData.name },
@@ -436,7 +432,6 @@ exports.updateCompanyByOwner = async (ownerId, updateData) => {
   return updatedCompany;
 };
 
-// Calculate profile completion percentage
 exports.getProfileCompletion = (company) => {
   const requiredFields = ['name', 'description', 'website', 'location', 'logo', 'industry', 'companySize'];
   const completedFields = requiredFields.filter(field => company[field] && company[field].length > 0);

@@ -15,7 +15,6 @@ const Navbar = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const [companyLogo, setCompanyLogo] = useState(null);
 
-  // Fetch company logo for COMPANY role users
   useEffect(() => {
     const fetchCompanyLogo = async () => {
       if (user?.role === 'COMPANY' || user?.role === 'company') {
@@ -38,14 +37,12 @@ const Navbar = () => {
 
     fetchCompanyLogo();
 
-    // Refresh logo when window gains focus (after updating profile)
     const handleFocus = () => {
       if (user?.role === 'COMPANY') {
         fetchCompanyLogo();
       }
     };
 
-    // Listen for company logo updates
     const handleLogoUpdate = () => {
       if (user?.role === 'COMPANY') {
         fetchCompanyLogo();
@@ -61,7 +58,6 @@ const Navbar = () => {
     };
   }, [user?.role, user?.id]);
 
-  // Determine avatar source based on role
   const getAvatarSrc = () => {
     if (user?.role === 'COMPANY' && companyLogo) {
       return companyLogo;

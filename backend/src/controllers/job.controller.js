@@ -2,7 +2,6 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const logger = require('../utils/logger');
 
-// Get all jobs (public)
 exports.getAllJobs = async (req, res, next) => {
   try {
     const { 
@@ -20,7 +19,6 @@ exports.getAllJobs = async (req, res, next) => {
       isActive: true,
     };
 
-    // Search filter
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
@@ -29,22 +27,18 @@ exports.getAllJobs = async (req, res, next) => {
       ];
     }
 
-    // Location filter
     if (location) {
       where.location = { contains: location, mode: 'insensitive' };
     }
 
-    // Job type filter
     if (jobType) {
       where.jobType = jobType;
     }
 
-    // Experience level filter
     if (experienceLevel) {
       where.experienceLevel = experienceLevel;
     }
 
-    // Salary filter
     if (salaryMin) {
       where.salaryMin = { gte: parseInt(salaryMin) };
     }
@@ -104,7 +98,6 @@ exports.getAllJobs = async (req, res, next) => {
   }
 };
 
-// Get job by ID (public)
 exports.getJobById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -155,13 +148,11 @@ exports.getJobById = async (req, res, next) => {
   }
 };
 
-// Apply to a job (protected)
 exports.applyToJob = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Check if job exists
     const job = await prisma.job.findUnique({
       where: { id },
     });
@@ -180,7 +171,6 @@ exports.applyToJob = async (req, res, next) => {
       });
     }
 
-    // Check if user already applied
     const existingApplication = await prisma.application.findFirst({
       where: {
         jobId: id,
@@ -195,7 +185,6 @@ exports.applyToJob = async (req, res, next) => {
       });
     }
 
-    // Create application
     const application = await prisma.application.create({
       data: {
         jobId: id,
@@ -227,7 +216,6 @@ exports.applyToJob = async (req, res, next) => {
   }
 };
 
-// Get my applications (protected)
 exports.getMyApplications = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -264,14 +252,12 @@ exports.getMyApplications = async (req, res, next) => {
   }
 };
 
-// Update application status (protected - recruiter only)
 exports.updateApplicationStatus = async (req, res, next) => {
   try {
     const { applicationId } = req.params;
     const { status } = req.body;
     const userId = req.user.id;
 
-    // Check if application exists
     const application = await prisma.application.findUnique({
       where: { id: applicationId },
       include: {
@@ -290,7 +276,6 @@ exports.updateApplicationStatus = async (req, res, next) => {
       });
     }
 
-    // Check if user is authorized (must be recruiter of the company or admin)
     if (req.user.role !== 'ADMIN') {
       const isRecruiter = await prisma.company.findFirst({
         where: {
@@ -311,7 +296,6 @@ exports.updateApplicationStatus = async (req, res, next) => {
       }
     }
 
-    // Update application status
     const updatedApplication = await prisma.application.update({
       where: { id: applicationId },
       data: { status },

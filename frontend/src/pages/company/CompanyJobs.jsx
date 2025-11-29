@@ -32,7 +32,6 @@ const CompanyJobs = () => {
     }
 
     fetchCompanyAndJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.role]);
 
   const fetchCompanyAndJobs = async () => {
@@ -51,7 +50,6 @@ const CompanyJobs = () => {
       }
 
       setCompany(response.data.company);
-      // Jobs are included in company data
       setJobs(response.data.company.jobs || []);
     } catch (error) {
       toast({

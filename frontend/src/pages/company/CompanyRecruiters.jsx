@@ -40,7 +40,6 @@ const CompanyRecruiters = () => {
     }
 
     fetchCompanyAndRecruiters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.role]);
 
   const fetchCompanyAndRecruiters = async () => {
@@ -86,7 +85,6 @@ const CompanyRecruiters = () => {
     try {
       setAddingRecruiter(true);
       
-      // Add recruiter via backend endpoint
       await companyService.addEmployer(company.id, {
         email: recruiterEmail,
         title: recruiterTitle,
@@ -98,16 +96,13 @@ const CompanyRecruiters = () => {
         description: 'Recruiter added successfully',
       });
 
-      // Reset form
       setRecruiterEmail('');
       setRecruiterTitle('');
       setRecruiterDepartment('');
       setShowAddForm(false);
       
-      // Refresh list
       fetchCompanyAndRecruiters();
 
-      // Notify other parts of the app (e.g., Company Home) that company data has changed
       window.dispatchEvent(new CustomEvent('companyDataUpdated'));
     } catch (error) {
       toast({
@@ -126,7 +121,6 @@ const CompanyRecruiters = () => {
     }
 
     try {
-      // Remove recruiter via backend endpoint
       await companyService.removeEmployer(company.id, { userId: employerId });
 
       toast({
@@ -136,7 +130,6 @@ const CompanyRecruiters = () => {
 
       fetchCompanyAndRecruiters();
 
-      // Notify other parts of the app (e.g., Company Home) that company data has changed
       window.dispatchEvent(new CustomEvent('companyDataUpdated'));
     } catch (error) {
       toast({

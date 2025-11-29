@@ -4,16 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const Groq = require('groq-sdk');
 
-// Initialize Groq Client
-// Note: Ensure GROQ_API_KEY is in your .env file
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
 
-// --- Load Documentation Context ---
 let documentationContext = '';
 try {
-  // Path to WEBSITE_DOCUMENTATION.md at project root
   const docPath = path.join(__dirname, '../../../../WEBSITE_DOCUMENTATION.md');
   
   if (fs.existsSync(docPath)) {
@@ -26,7 +22,6 @@ try {
   console.error('Failed to load documentation:', err);
 }
 
-// --- Helper Functions ---
 
 function parseYears(ym) {
   if (!ym) return null;
@@ -90,22 +85,17 @@ function scoreJob(job, userSkills) {
 exports.handleMessage = async (userId, message) => {
   const text = (message || '').toLowerCase();
 
-  // --- 1. Functional Intents (Regex) ---
-  // These return structured data for UI components
 
-  // intent: applications stats
   if (/how many|count.*apply|applications?\s*(have|did)\s*i/.test(text)) {
     const stats = await this.applicationStats(userId);
     return { type: 'stats', stats };
   }
 
-  // intent: list my applications
   if (/show.*applications|my applications|applied jobs/.test(text)) {
     const apps = await this.userApplications(userId);
     return { type: 'applications', applications: apps };
   }
 
-  // intent: jobs at company X
   const companyMatch = text.match(/(jobs|roles) (at|in) ([a-z0-9 ._-]+)/i);
   if (companyMatch) {
     const company = companyMatch[3].trim();
@@ -131,7 +121,6 @@ exports.handleMessage = async (userId, message) => {
     return { type: 'jobList', jobs: sorted };
   }
 
-  // intent: entry-level roles
   if (/entry[- ]level/.test(text)) {
     const { skills } = await computeUserSignals(userId);
     const jobs = await prisma.job.findMany({
@@ -152,14 +141,11 @@ exports.handleMessage = async (userId, message) => {
     return { type: 'jobList', jobs: sorted };
   }
 
-  // intent: match jobs for me (explicit)
   if (/match|recommend|suggest/.test(text) && !text.includes('how')) {
     const result = await this.matchJobs(userId, {});
     return { type: 'jobList', jobs: result.jobs };
   }
 
-  // --- 2. LLM Fallback for General Queries ---
-  // Use Groq to answer questions based on documentation
   
   try {
     const completion = await groq.chat.completions.create({
@@ -200,7 +186,6 @@ exports.handleMessage = async (userId, message) => {
     }
   } catch (error) {
     console.error('Groq LLM Error:', error);
-    // Fallback if LLM fails
     return { 
       type: 'text', 
       message: "I'm having a little trouble connecting to my brain right now. Please try asking again in a moment!" 

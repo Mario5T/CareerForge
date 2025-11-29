@@ -29,7 +29,6 @@ const Jobs = () => {
   const debounceTimer = useRef(null);
   const [savedJobs, setSavedJobs] = useState(new Set());
 
-  // Fetch saved jobs
   useEffect(() => {
     const fetchSavedJobs = async () => {
       try {
@@ -67,13 +66,11 @@ const Jobs = () => {
     }
   };
 
-  // Fetch jobs on initial load
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         setInitialLoading(true);
         
-        // Build query params for backend filtering
         const params = {};
         if (debouncedSearchTerm) params.search = debouncedSearchTerm;
         if (filters.location) params.location = filters.location;
@@ -96,10 +93,8 @@ const Jobs = () => {
     };
 
     fetchJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Dynamic search with debounce
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -109,7 +104,6 @@ const Jobs = () => {
       try {
         setFetching(true);
         
-        // Build query params for backend filtering
         const params = {};
         if (debouncedSearchTerm) params.search = debouncedSearchTerm;
         if (filters.location) params.location = filters.location;
@@ -136,7 +130,6 @@ const Jobs = () => {
         clearTimeout(debounceTimer.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchTerm, filters.location, filters.jobType, filters.experience]);
 
   const handleSearch = useCallback((e) => {
@@ -158,7 +151,6 @@ const Jobs = () => {
     setInputValue(e.target.value);
   }, []);
 
-  // Memoize pagination calculations to prevent unnecessary recalculations
   const paginationData = useMemo(() => {
     const indexOfLastJob = currentPage * jobsPerPage;
     const indexOfFirstJob = indexOfLastJob - jobsPerPage;
@@ -351,7 +343,6 @@ const Jobs = () => {
               Previous
             </Button>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              // Show page numbers with ellipsis
               let pageNum;
               if (totalPages <= 5) {
                 pageNum = i + 1;

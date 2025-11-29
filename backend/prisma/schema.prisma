@@ -1,5 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -26,12 +24,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // OAuth fields
   googleId  String?  @unique
   provider  String?  // 'google', 'local', etc.
   avatar    String?  // Profile picture from OAuth provider
 
-  // Relations
   employers      Employer[]
   jobsCreated    Job[]        @relation("JobCreator")
   applications   Application[]
@@ -57,7 +53,6 @@ model Company {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
   ownerId       String?
   owner         User?      @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   employers     Employer[]
@@ -76,7 +71,6 @@ model Employer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   companyId String
@@ -104,7 +98,6 @@ model Job {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  // Relations
   companyId     String
   company       Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
   employerId    String
@@ -128,7 +121,6 @@ model Application {
   appliedAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
-  // Relations
   applicantId String
   applicant   User   @relation(fields: [applicantId], references: [id], onDelete: Cascade)
   jobId       String
@@ -155,7 +147,6 @@ model WorkExperience {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  // Relations
   userId            String
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -176,14 +167,12 @@ model Education {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  // Relations
   userId            String
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
-// Enums
 enum Role {
   USER
   RECRUITER

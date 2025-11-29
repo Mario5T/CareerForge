@@ -5,19 +5,16 @@ const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL } = require(
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET, JWT_EXPIRE } = require('./env');
 
-// Check OAuth envs; if missing, warn and continue without registering the strategy
 const OAUTH_ENABLED = Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET);
 if (!OAUTH_ENABLED) {
   console.warn('\n[OAuth] Google OAuth is disabled: `GOOGLE_CLIENT_ID` and/or `GOOGLE_CLIENT_SECRET` not set.');
   console.warn('Add them to backend/.env (see backend/OAUTH_SETUP.md). The rest of the API will still run.');
 }
 
-// Serialize user for session
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-// Deserialize user from session
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await prisma.user.findUnique({
@@ -45,7 +42,6 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Google OAuth Strategy
 if (OAUTH_ENABLED) {
   passport.use(
     new GoogleStrategy(
@@ -56,13 +52,11 @@ if (OAUTH_ENABLED) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          // Check if user exists with this Google ID
           let existingUser = await prisma.user.findUnique({
             where: { googleId: profile.id },
           });
 
           if (existingUser) {
-            // Update user with latest profile info if needed
             const updatedUser = await prisma.user.update({
               where: { id: existingUser.id },
               data: {
@@ -90,13 +84,11 @@ if (OAUTH_ENABLED) {
             return done(null, updatedUser);
           }
 
-          // Check if user exists with this email (for linking accounts)
           existingUser = await prisma.user.findUnique({
             where: { email: profile.emails?.[0]?.value },
           });
 
           if (existingUser) {
-            // Link Google account to existing user
             const updatedUser = await prisma.user.update({
               where: { id: existingUser.id },
               data: {
@@ -125,7 +117,6 @@ if (OAUTH_ENABLED) {
             return done(null, updatedUser);
           }
 
-          // Create new user
           const newUser = await prisma.user.create({
             data: {
               name: profile.displayName,

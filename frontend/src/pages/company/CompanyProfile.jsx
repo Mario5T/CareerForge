@@ -41,7 +41,6 @@ const CompanyProfile = () => {
   });
 
   useEffect(() => {
-    // Check if user has COMPANY role
     if (user?.role !== 'COMPANY') {
       toast({
         title: 'Access Denied',
@@ -97,7 +96,6 @@ const CompanyProfile = () => {
     };
 
     fetchCompanyData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.role]);
 
   const handleChange = (e) => {
@@ -132,7 +130,6 @@ const CompanyProfile = () => {
         setProfileCompletion(response.data.profileCompletion);
       }
 
-      // Trigger navbar to refresh logo
       window.dispatchEvent(new CustomEvent('companyLogoUpdated'));
     } catch (error) {
       console.error('Error saving company:', error);

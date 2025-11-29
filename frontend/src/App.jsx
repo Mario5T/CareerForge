@@ -5,11 +5,9 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { checkAuth } from './store/slices/auth/authSlice';
 
-// Layouts
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 
-// Pages
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';

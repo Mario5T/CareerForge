@@ -38,7 +38,6 @@ const PostJob = () => {
     setLoading(true);
 
     try {
-      // Convert requirements from string to array
       const requirements = formData.requirements
         .split('\n')
         .filter(req => req.trim() !== '');

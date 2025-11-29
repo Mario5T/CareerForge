@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
-// Initialize theme early to avoid flash
 function initializeTheme() {
   try {
     const stored = localStorage.getItem('theme');
@@ -20,17 +19,14 @@ function initializeTheme() {
   } catch {}
 }
 
-// Initialize on page load
 initializeTheme();
 
-// Re-initialize theme on visibility change (handles OAuth redirects)
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     initializeTheme();
   }
 });
 
-// Also re-initialize on page show (handles browser back/forward)
 window.addEventListener('pageshow', () => {
   initializeTheme();
 });

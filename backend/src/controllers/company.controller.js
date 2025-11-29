@@ -35,7 +35,6 @@ exports.getCompanyById = async (req, res) => {
   }
 };
 
-// Update company
 exports.updateCompany = async (req, res) => {
   try {
     const company = await companyService.updateCompany(
@@ -50,7 +49,6 @@ exports.updateCompany = async (req, res) => {
   }
 };
 
-// Delete company
 exports.deleteCompany = async (req, res) => {
   try {
     await companyService.deleteCompany(req.params.id, req.user.id);
@@ -108,7 +106,6 @@ exports.getCompanyEmployers = async (req, res) => {
   }
 };
 
-// COMPANY role: Get own company
 exports.getMyCompany = async (req, res) => {
   try {
     const company = await companyService.getCompanyByOwnerId(req.user.id);
@@ -130,10 +127,8 @@ exports.getMyCompany = async (req, res) => {
   }
 };
 
-// COMPANY role: Create own company
 exports.createMyCompany = async (req, res) => {
   try {
-    // Check if user has COMPANY role
     if (req.user.role !== 'COMPANY') {
       return errorResponse(res, 403, 'Only users with COMPANY role can create a company');
     }
@@ -151,10 +146,8 @@ exports.createMyCompany = async (req, res) => {
   }
 };
 
-// COMPANY role: Update own company
 exports.updateMyCompany = async (req, res) => {
   try {
-    // Check if user has COMPANY role
     if (req.user.role !== 'COMPANY') {
       return errorResponse(res, 403, 'Only users with COMPANY role can update their company');
     }

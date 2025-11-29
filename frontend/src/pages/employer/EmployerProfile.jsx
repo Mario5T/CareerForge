@@ -42,7 +42,6 @@ const EmployerProfile = () => {
   ];
 
   useEffect(() => {
-    // Check if user has RECRUITER or COMPANY role
     if (user?.role !== 'RECRUITER' && user?.role !== 'COMPANY') {
       toast({
         title: 'Access Denied',
@@ -92,7 +91,6 @@ const EmployerProfile = () => {
     };
 
     fetchEmployerData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.role]);
 
   const handleChange = (e) => {
@@ -132,7 +130,6 @@ const EmployerProfile = () => {
       console.log('💾 Profile saved to database successfully!');
       console.log('📊 Response data:', response);
 
-      // Refresh the page to show updated data
       setTimeout(() => {
         window.location.reload();
       }, 1000);

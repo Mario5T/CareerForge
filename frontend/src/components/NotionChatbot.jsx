@@ -15,19 +15,16 @@ export default function NotionChatbot() {
 
   const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading]);
 
-  // Focus input on open
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
 
-  // Scroll to bottom
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, open]);
 
-  // Close on Escape
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape') setOpen(false);
@@ -36,7 +33,6 @@ export default function NotionChatbot() {
     return () => window.removeEventListener('keydown', handleEsc);
   }, [open]);
 
-  // Close on click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
