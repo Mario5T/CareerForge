@@ -32,6 +32,9 @@ import PublicProfile from './pages/profile/PublicProfile';
 import PublicUserProfile from './pages/profile/PublicUserProfile';
 import PublicRecruiterProfile from './pages/profile/PublicRecruiterProfile';
 import PublicCompanyProfile from './pages/profile/PublicCompanyProfile';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import ContactUs from './pages/ContactUs';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -96,6 +99,18 @@ const router = createBrowserRouter([
       {
         path: 'public/company/:id',
         element: <PublicCompanyProfile />,
+      },
+      {
+        path: 'terms',
+        element: <TermsOfService />,
+      },
+      {
+        path: 'privacy',
+        element: <PrivacyPolicy />,
+      },
+      {
+        path: 'contact',
+        element: <ContactUs />,
       },
       {
         path: 'profile',
