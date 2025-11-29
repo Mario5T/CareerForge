@@ -1290,7 +1290,13 @@ const Profile = () => {
                             </div>
                             <div className="flex items-center gap-2">
                               <a
-                                href={`http://localhost:5001/${profile.resume}`}
+                                href={(() => {
+                                  if (profile.resume.startsWith('http')) return profile.resume;
+                                  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
+                                  const BASE_URL = API_URL.replace('/api/v1', '');
+                                  const cleanPath = profile.resume.startsWith('/') ? profile.resume.slice(1) : profile.resume;
+                                  return `${BASE_URL}/${cleanPath}`;
+                                })()}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600 rounded-full transition-colors"

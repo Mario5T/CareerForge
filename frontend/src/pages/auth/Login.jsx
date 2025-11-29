@@ -108,7 +108,10 @@ const Login = () => {
         variant="outline"
         type="button"
         className="w-full"
-        onClick={() => window.location.href = 'http://localhost:5001/api/v1/auth/google'}
+        onClick={() => {
+          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
+          window.location.href = `${API_URL}/auth/google`;
+        }}
       >
         <svg
           className="mr-2 h-4 w-4"

@@ -23,9 +23,8 @@ const Home = () => {
   useEffect(() => {
     const fetchFeaturedJobs = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/v1/jobs');
-        if (!response.ok) throw new Error('Failed to fetch jobs');
-        const data = await response.json();
+        const response = await api.get('/jobs');
+        const data = response.data;
         setFeaturedJobs((data.data || []).slice(0, 6));
       } catch (err) {
         console.error('Error fetching featured jobs:', err);
@@ -61,9 +60,8 @@ const Home = () => {
       if (user?.id && user?.role === 'USER' && userProfile?.skills && userProfile.skills.length > 0) {
         setLoadingRecommended(true);
         try {
-          const response = await fetch('http://localhost:5001/api/v1/jobs');
-          if (!response.ok) throw new Error('Failed to fetch jobs');
-          const data = await response.json();
+          const response = await api.get('/jobs');
+          const data = response.data;
           
           const jobsWithMatch = (data.data || []).map(job => ({
             ...job,
