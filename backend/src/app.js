@@ -45,7 +45,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Preflight fix
+app.options("*", cors(corsOptions));
 
 app.use(
   session({
