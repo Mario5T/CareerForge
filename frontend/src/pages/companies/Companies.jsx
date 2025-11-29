@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
 import { Building2, MapPin, Search } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
 import SearchBar from '../../components/SearchBar';
 import useDebounce from '../../hooks/useDebounce';
 import CompanyCard from '../../components/CompanyCard';
+import companyService from '../../services/company.service';
 
 const Companies = () => {
-  const { user } = useAuth();
   const [inputValue, setInputValue] = useState('');
   const debouncedSearchTerm = useDebounce(inputValue, 300);
   const [companies, setCompanies] = useState([]);
@@ -19,89 +19,54 @@ const Companies = () => {
     industry: '',
     size: ''
   });
-  const mockCompanies = [
-    {
-      id: '1',
-      name: 'TechCorp Inc.',
-      description: 'Leading technology company specializing in web and mobile applications.',
-      logo: '/placeholder-company.png',
-      industry: 'Technology',
-      size: '1001-5000',
-      location: 'San Francisco, CA',
-      rating: 4.5,
-      jobs: 24,
-      isHiring: true,
-    },
-    {
-      id: '2',
-      name: 'DesignHub',
-      description: 'Creative design agency focused on UI/UX and branding solutions.',
-      logo: '/placeholder-company.png',
-      industry: 'Design',
-      size: '51-200',
-      location: 'New York, NY',
-      rating: 4.2,
-      jobs: 8,
-      isHiring: true,
-    },
-    {
-      id: '3',
-      name: 'DataSystems',
-      description: 'Enterprise data solutions and analytics platform provider.',
-      logo: '/placeholder-company.png',
-      industry: 'Data & Analytics',
-      size: '201-500',
-      location: 'Austin, TX',
-      rating: 4.0,
-      jobs: 12,
-      isHiring: false,
-    },
-    {
-      id: '4',
-      name: 'CloudScale',
-      description: 'Cloud infrastructure and DevOps services for modern applications.',
-      logo: '/placeholder-company.png',
-      industry: 'Cloud Computing',
-      size: '501-1000',
-      location: 'Seattle, WA',
-      rating: 4.7,
-      jobs: 16,
-      isHiring: true,
-    },
-  ];
 
-  // ✅ useMemo for expensive filtering operations (derived from current data)
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        setLoading(true);
+        const res = await companyService.getAllCompanies();
+
+        if (res.success && res.data && Array.isArray(res.data.companies)) {
+          setCompanies(res.data.companies);
+        } else if (res.success && Array.isArray(res.data)) {
+
+           setCompanies(res.data);
+        } else {
+          setCompanies([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch companies:", error);
+        setCompanies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
+
+
   const filteredCompanies = useMemo(() => {
     return companies.filter(company => {
       const matchesSearch = !debouncedSearchTerm || 
-        company.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        company.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        company.industry.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+        company.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        company.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        company.industry?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       
       const matchesLocation = !filters.location || 
-                           company.location.toLowerCase().includes(filters.location.toLowerCase());
+                           company.location?.toLowerCase().includes(filters.location.toLowerCase());
       
       const matchesIndustry = !filters.industry || 
-                           company.industry.toLowerCase() === filters.industry.toLowerCase();
+                           company.industry?.toLowerCase() === filters.industry.toLowerCase();
       
       const matchesSize = !filters.size || 
-                       company.size === filters.size;
+                       company.companySize === filters.size; 
       
       return matchesSearch && matchesLocation && matchesIndustry && matchesSize;
     });
   }, [companies, debouncedSearchTerm, filters]);
 
-  // Fetch once on mount (simulated). Do NOT toggle loading on each keystroke.
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setCompanies(mockCompanies);
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // ✅ useCallback for event handlers
   const handleFilterChange = useCallback((e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
@@ -127,9 +92,9 @@ const Companies = () => {
     });
   }, []);
 
-  // ✅ useMemo for static arrays to prevent recreation
-  const industries = useMemo(() => [...new Set(mockCompanies.map(company => company.industry))], []);
-  const companySizes = useMemo(() => [...new Set(mockCompanies.map(company => company.size))], []);
+ 
+  const industries = useMemo(() => [...new Set(companies.map(company => company.industry).filter(Boolean))], [companies]);
+  const companySizes = useMemo(() => [...new Set(companies.map(company => company.companySize).filter(Boolean))], [companies]);
 
   if (loading) {
     return (
@@ -148,7 +113,7 @@ const Companies = () => {
         </p>
       </div>
 
-      {/* Search and Filters */}
+
       <Card className="mb-8 animate-in fade-in-0 slide-in-from-top-2 duration-300">
         <CardContent className="pt-6">
           <form onSubmit={handleSearch} className="space-y-4">
@@ -199,7 +164,7 @@ const Companies = () => {
                 <option value="">All Company Sizes</option>
                 {companySizes.map((size, index) => (
                   <option key={index} value={size}>
-                    {size} employees
+                    {size.replace('SIZE_', '').replace('_', '-')} employees
                   </option>
                 ))}
               </select>
@@ -248,32 +213,19 @@ const Companies = () => {
           <h2 className="text-2xl font-bold mb-6">Featured Companies</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {filteredCompanies.slice(0, 6).map((company) => (
-              <Card key={`featured-${company.id}`} className="group text-center p-4 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 hover:shadow-lg transition-all hover:-translate-y-0.5">
-                <div className="bg-primary/10 p-3 rounded-lg inline-block mb-3 transition-transform duration-300 group-hover:scale-105">
-                  <Building2 className="h-8 w-8 text-primary" />
-                </div>
-                <h4 className="font-medium">{company.name}</h4>
-                <p className="text-sm text-muted-foreground">{company.jobs} jobs</p>
-              </Card>
+              <Link key={`featured-${company.id}`} to={`/companies/${company.id}`} className="block">
+                <Card className="group text-center p-4 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 hover:shadow-lg transition-all hover:-translate-y-0.5 h-full">
+                  <div className="bg-primary/10 p-3 rounded-lg inline-block mb-3 transition-transform duration-300 group-hover:scale-105">
+                    <Building2 className="h-8 w-8 text-primary" />
+                  </div>
+                  <h4 className="font-medium truncate px-2">{company.name}</h4>
+                  <p className="text-sm text-muted-foreground">{company._count?.jobs || 0} jobs</p>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
       )}
-      
-      <Card className="mt-16 bg-gradient-to-r from-primary/10 to-primary/5 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 hover:shadow-md transition-shadow">
-        <CardContent className="p-8 text-center">
-          <h2 className="text-2xl font-bold mb-2">Want to list your company?</h2>
-          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Join thousands of companies hiring the best talent on our platform. Create your company profile today and start connecting with qualified candidates.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            {(!user || user.role !== 'COMPANY') && (
-              <Button size="lg">Post a Job</Button>
-            )}
-            <Button variant="outline" size="lg">Learn More</Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
