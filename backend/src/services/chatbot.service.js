@@ -1,5 +1,32 @@
 const { prisma } = require('../config/db');
 const { AppError } = require('../utils/errorHandler');
+const fs = require('fs');
+const path = require('path');
+const Groq = require('groq-sdk');
+
+// Initialize Groq Client
+// Note: Ensure GROQ_API_KEY is in your .env file
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});
+
+// --- Load Documentation Context ---
+let documentationContext = '';
+try {
+  // Path to WEBSITE_DOCUMENTATION.md at project root
+  const docPath = path.join(__dirname, '../../../../WEBSITE_DOCUMENTATION.md');
+  
+  if (fs.existsSync(docPath)) {
+    documentationContext = fs.readFileSync(docPath, 'utf-8');
+    console.log('Documentation loaded for LLM context.');
+  } else {
+    console.warn('Documentation file not found at:', docPath);
+  }
+} catch (err) {
+  console.error('Failed to load documentation:', err);
+}
+
+// --- Helper Functions ---
 
 function parseYears(ym) {
   if (!ym) return null;
@@ -63,6 +90,9 @@ function scoreJob(job, userSkills) {
 exports.handleMessage = async (userId, message) => {
   const text = (message || '').toLowerCase();
 
+  // --- 1. Functional Intents (Regex) ---
+  // These return structured data for UI components
+
   // intent: applications stats
   if (/how many|count.*apply|applications?\s*(have|did)\s*i/.test(text)) {
     const stats = await this.applicationStats(userId);
@@ -122,13 +152,62 @@ exports.handleMessage = async (userId, message) => {
     return { type: 'jobList', jobs: sorted };
   }
 
-  // default: match jobs for me
-  if (/match|jobs for me|recommend|suggest/.test(text) || text.trim().length > 0) {
+  // intent: match jobs for me (explicit)
+  if (/match|recommend|suggest/.test(text) && !text.includes('how')) {
     const result = await this.matchJobs(userId, {});
     return { type: 'jobList', jobs: result.jobs };
   }
 
-  return { type: 'text', message: "Sorry, I didn't understand that." };
+  // --- 2. LLM Fallback for General Queries ---
+  // Use Groq to answer questions based on documentation
+  
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `You are the CareerForge AI Assistant, a helpful and friendly bot for the CareerForge job portal.
+          
+          Your goal is to assist users by answering questions about the platform, features, and how to use it.
+          
+          Use the following documentation as your PRIMARY source of truth:
+          =========================================
+          ${documentationContext}
+          =========================================
+          
+          Guidelines:
+          1. Be concise and friendly.
+          2. If the user asks about their specific data (like "my applications"), politely suggest they use the specific command "show my applications" or "my stats".
+          3. Format your response with Markdown (bolding key terms, using lists).
+          4. If the answer is not in the documentation, say you don't know but offer to help with general job search advice.
+          5. Do NOT make up features that don't exist in the documentation.
+          `
+        },
+        {
+          role: 'user',
+          content: message
+        }
+      ],
+      model: 'llama-3.3-70b-versatile', // Using supported 70b model
+      temperature: 0.5,
+      max_tokens: 1024,
+    });
+
+    const llmResponse = completion.choices[0]?.message?.content;
+    
+    if (llmResponse) {
+      return { type: 'text', message: llmResponse };
+    }
+  } catch (error) {
+    console.error('Groq LLM Error:', error);
+    // Fallback if LLM fails
+    return { 
+      type: 'text', 
+      message: "I'm having a little trouble connecting to my brain right now. Please try asking again in a moment!" 
+    };
+  }
+
+  return { type: 'text', message: "I'm not sure about that. Try asking about jobs, your applications, or how to use the platform!" };
 };
 
 exports.matchJobs = async (userId, query = {}) => {

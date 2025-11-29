@@ -3,9 +3,9 @@ import Navbar from '../components/shared/Navbar';
 import Footer from '../components/shared/Footer';
 import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import NotionChatbot from '../components/NotionChatbot';
 
 const MainLayout = () => {
-  // Always call hooks unconditionally and in the same order
   const { isLoading } = useAuth();
 
   if (isLoading) {
@@ -19,6 +19,9 @@ const MainLayout = () => {
         <Outlet />
       </main>
       <Footer />
+
+      {/* Notion-style Floating Chatbot */}
+      <NotionChatbot />
     </div>
   );
 };
