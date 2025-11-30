@@ -11,56 +11,51 @@ const OAuthCallback = () => {
     const { toast } = useToast();
 
     useEffect(() => {
-        const token = searchParams.get('token');
-        const success = searchParams.get('success');
+        try {
+            const token = searchParams.get('token');
+            const success = searchParams.get('success');
+            const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api/v1';
 
-        if (success === 'true' && token) {
-            // Store token in localStorage
-            localStorage.setItem('token', token);
+            if (success === 'true' && token) {
+                localStorage.setItem('token', token);
 
-            // Fetch user data with the token
-            fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1'}/auth/me`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.success && data.data.user) {
-                        // Update Redux state
-                        dispatch(setCredentials({ user: data.data.user, token }));
+                fetch(`${API_URL}/auth/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data.success && data.data.user) {
+                            dispatch(setCredentials({ user: data.data.user, token }));
+
+                            toast({
+                                title: 'Success',
+                                description: 'You have successfully logged in!',
+                            });
+
+                            navigate('/', { replace: true });
+                        } else {
+                            throw new Error('Failed to fetch user');
+                        }
+                    })
+                    .catch((err) => {
+                        console.error('OAuth callback error:', err);
+                        localStorage.removeItem('token');
 
                         toast({
-                            title: 'Success',
-                            description: 'You have successfully logged in!',
-                            variant: 'default',
+                            title: 'Error',
+                            description: 'Authentication failed',
+                            variant: 'destructive',
                         });
 
-                        // Redirect to homepage
-                        navigate('/', { replace: true });
-                    } else {
-                        throw new Error('Failed to fetch user data');
-                    }
-                })
-                .catch((error) => {
-                    console.error('OAuth callback error:', error);
-                    localStorage.removeItem('token');
-
-                    toast({
-                        title: 'Error',
-                        description: 'Authentication failed. Please try again.',
-                        variant: 'destructive',
+                        navigate('/auth/login', { replace: true });
                     });
-
-                    navigate('/auth/login', { replace: true });
-                });
-        } else {
-            toast({
-                title: 'Error',
-                description: 'Authentication failed. Please try again.',
-                variant: 'destructive',
-            });
-
+            } else {
+                navigate('/auth/login', { replace: true });
+            }
+        } catch (err) {
+            console.error('Fatal OAuth error:', err);
             navigate('/auth/login', { replace: true });
         }
     }, [searchParams, navigate, dispatch, toast]);

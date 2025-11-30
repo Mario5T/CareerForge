@@ -50,7 +50,7 @@ const AuthInitializer = ({ children }) => {
     if (token) {
       dispatch(checkAuth());
     }
-  }, []);
+  }, [dispatch]);
 
   return children;
 };
