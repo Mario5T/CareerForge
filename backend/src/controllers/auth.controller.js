@@ -34,13 +34,18 @@ exports.googleCallback = async (req, res, next) => {
       try {
         const result = await oauthService.handleOAuthCallback(user);
         const { FRONTEND_URL } = require('../config/env');
-        const redirectUrl = req.session.returnUrl || `${FRONTEND_URL}/auth/callback`;
+        // Ensure we have a valid frontend URL with protocol
+        const baseUrl = FRONTEND_URL || 'http://localhost:3000';
+        const redirectUrl = req.session.returnUrl || `${baseUrl}/auth/callback`;
+        
+        // Ensure the redirect URL is properly formed
+        const finalRedirectUrl = new URL(redirectUrl, baseUrl).toString();
 
         if (req.session.returnUrl) {
           delete req.session.returnUrl;
         }
 
-        return res.redirect(`${redirectUrl}?token=${result.token}&success=true`);
+        return res.redirect(`${finalRedirectUrl}?token=${result.token}&success=true`);
       } catch (serviceError) {
         logger.error(`OAuth callback service error: ${serviceError.message}`);
         errorResponse(res, 500, 'Failed to complete authentication');

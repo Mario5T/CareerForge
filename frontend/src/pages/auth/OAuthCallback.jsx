@@ -1,71 +1,92 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../store/slices/auth/authSlice';
 import { useToast } from '../../components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
 
 const OAuthCallback = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { toast } = useToast();
-
+    const location = useLocation();
+    
     useEffect(() => {
-        try {
-            const token = searchParams.get('token');
-            const success = searchParams.get('success');
-            const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api/v1';
+        const handleAuth = async () => {
+            try {
+                console.log('OAuth callback received:', location.search);
+                
+                const token = searchParams.get('token');
+                const success = searchParams.get('success');
+                const error = searchParams.get('error');
+                const API_URL = import.meta.env.VITE_API_URL || 'https://careerforge-production.up.railway.app/api/v1';
 
-            if (success === 'true' && token) {
-                localStorage.setItem('token', token);
+                console.log('OAuth callback params:', { token, success, error });
 
-                fetch(`${API_URL}/auth/me`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-                    .then((res) => res.json())
-                    .then((data) => {
-                        if (data.success && data.data.user) {
-                            dispatch(setCredentials({ user: data.data.user, token }));
+                if (error) {
+                    throw new Error(error || 'Authentication failed');
+                }
 
-                            toast({
-                                title: 'Success',
-                                description: 'You have successfully logged in!',
-                            });
+                if (success === 'true' && token) {
+                    console.log('Processing OAuth callback with token');
+                    localStorage.setItem('token', token);
 
-                            navigate('/', { replace: true });
-                        } else {
-                            throw new Error('Failed to fetch user');
-                        }
-                    })
-                    .catch((err) => {
-                        console.error('OAuth callback error:', err);
-                        localStorage.removeItem('token');
-
-                        toast({
-                            title: 'Error',
-                            description: 'Authentication failed',
-                            variant: 'destructive',
-                        });
-
-                        navigate('/auth/login', { replace: true });
+                    const response = await fetch(`${API_URL}/auth/me`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include'
                     });
-            } else {
-                navigate('/auth/login', { replace: true });
+
+                    console.log('Auth me response status:', response.status);
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || 'Failed to fetch user data');
+                    }
+
+                    const data = await response.json();
+                    console.log('User data received:', data);
+
+                    if (data.success && data.data?.user) {
+                        dispatch(setCredentials({ user: data.data.user, token }));
+                        toast({
+                            title: 'Success',
+                            description: 'You have successfully logged in!',
+                        });
+                        navigate('/', { replace: true });
+                    } else {
+                        throw new Error('Failed to fetch user data');
+                    }
+                } else {
+                    throw new Error('Missing token or success parameter');
+                }
+            } catch (error) {
+                console.error('OAuth error:', error);
+                localStorage.removeItem('token');
+                
+                toast({
+                    title: 'Authentication Failed',
+                    description: error.message || 'Failed to authenticate with Google',
+                    variant: 'destructive',
+                });
+                
+                navigate('/login', { replace: true });
             }
-        } catch (err) {
-            console.error('Fatal OAuth error:', err);
-            navigate('/auth/login', { replace: true });
-        }
-    }, [searchParams, navigate, dispatch, toast]);
+        };
+
+        handleAuth();
+    }, [dispatch, location.search, navigate, searchParams, toast]);
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-lg font-medium">Completing sign in...</p>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4">
+                <Loader2 className="h-full w-full text-primary" />
             </div>
+            <h2 className="text-2xl font-bold mb-2 text-center">Processing your login...</h2>
+            <p className="text-muted-foreground text-center">You'll be redirected shortly</p>
         </div>
     );
 };
