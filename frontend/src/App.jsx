@@ -98,7 +98,7 @@ const router = createBrowserRouter([
         element: <PublicRecruiterProfile />,
       },
       {
-        path: 'auth/callback',
+        path: '/api/v1/auth/google/callback',
         element: <OAuthCallback />,
       },
       {

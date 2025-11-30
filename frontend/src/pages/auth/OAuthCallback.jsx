@@ -20,8 +20,7 @@ const OAuthCallback = () => {
                 const token = searchParams.get('token');
                 const success = searchParams.get('success');
                 const error = searchParams.get('error');
-                // Make sure this matches your backend URL exactly
-                const API_URL = import.meta.env.VITE_API_URL || 'https://careerforge-production.up.railway.app';
+                const API_URL = import.meta.env.VITE_API_URL || 'https://careerforge-production.up.railway.app/api/v1';
 
                 console.log('OAuth callback params:', { token, success, error });
 

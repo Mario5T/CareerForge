@@ -36,8 +36,8 @@ exports.googleCallback = async (req, res, next) => {
         const { FRONTEND_URL } = require('../config/env');
         // Ensure we have a valid frontend URL with protocol
         const baseUrl = FRONTEND_URL || 'http://localhost:3000';
-        // Update the callback URL to point to the frontend's callback route
-        const redirectUrl = req.session.returnUrl || `${baseUrl}/auth/callback`;
+        // Update the callback URL to match the frontend route
+        const redirectUrl = req.session.returnUrl || `${baseUrl}/api/v1/auth/google/callback`;
         
         // Ensure the redirect URL is properly formed
         const finalRedirectUrl = new URL(redirectUrl, baseUrl).toString();
