@@ -38,7 +38,7 @@ export default function NotionChatbot() {
       if (
         windowRef.current && 
         !windowRef.current.contains(e.target) && 
-        !e.target.closest('button[aria-label="Ask AI"]') // Don't close if clicking trigger
+        !e.target.closest('button[aria-label="Ask AI"]') 
       ) {
         setOpen(false);
       }
@@ -85,7 +85,6 @@ export default function NotionChatbot() {
 
   return (
     <>
-      {/* Floating Trigger Button - Fixed to Viewport */}
       <div 
         style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 9990 }}
         className="print:hidden"
@@ -95,23 +94,22 @@ export default function NotionChatbot() {
           aria-label="Ask AI"
           className={`
             flex items-center justify-center w-11 h-11 rounded-full 
-            bg-white text-slate-700
+            bg-purple-600 text-white
             shadow-[0_4px_12px_rgba(0,0,0,0.15)] 
-            hover:bg-slate-50 hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)]
+            hover:bg-purple-700 hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)]
             active:scale-95 active:shadow-sm
             transition-all duration-200 ease-out
-            border border-slate-100
+            border border-purple-700
           `}
         >
           {open ? (
-            <X size={20} className="text-slate-500" />
+            <X size={20} className="text-white" />
           ) : (
-            <Sparkles size={20} className="text-purple-600 fill-purple-100" />
+            <Sparkles size={20} className="text-white" />
           )}
         </button>
       </div>
 
-      {/* Chat Window - Rendered via Portal */}
       {open && createPortal(
         <div 
           className="fixed inset-0 z-[9999] pointer-events-none"
@@ -129,7 +127,6 @@ export default function NotionChatbot() {
               boxShadow: '0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08)'
             }}
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded bg-purple-100 flex items-center justify-center">
@@ -142,7 +139,6 @@ export default function NotionChatbot() {
               </div>
             </div>
 
-            {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
               {messages.length === 0 && (
                 <div className="flex flex-col items-center justify-center h-full text-center px-6 opacity-60">
@@ -197,7 +193,6 @@ export default function NotionChatbot() {
               <div ref={endRef} />
             </div>
 
-            {/* Input Area */}
             <div className="p-3 bg-white border-t border-slate-100">
               <div className="relative flex items-center">
                 <input
