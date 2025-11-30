@@ -33,13 +33,14 @@ exports.googleCallback = async (req, res, next) => {
 
       try {
         const result = await oauthService.handleOAuthCallback(user);
+        const { FRONTEND_URL } = require('../config/env');
+        const redirectUrl = req.session.returnUrl || `${FRONTEND_URL}/auth/callback`;
+
         if (req.session.returnUrl) {
-          const returnUrl = req.session.returnUrl;
           delete req.session.returnUrl;
-          return res.redirect(`${returnUrl}?token=${result.token}&success=true`);
         }
 
-        successResponse(res, 200, 'Login successful', result);
+        return res.redirect(`${redirectUrl}?token=${result.token}&success=true`);
       } catch (serviceError) {
         logger.error(`OAuth callback service error: ${serviceError.message}`);
         errorResponse(res, 500, 'Failed to complete authentication');

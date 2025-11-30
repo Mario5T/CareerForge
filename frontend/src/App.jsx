@@ -11,6 +11,7 @@ import AuthLayout from './layouts/AuthLayout';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import OAuthCallback from './pages/auth/OAuthCallback';
 import Dashboard from './pages/dashboard/Dashboard';
 import Profile from './pages/profile/Profile';
 import Jobs from './pages/jobs/Jobs';
@@ -239,6 +240,10 @@ const router = createBrowserRouter([
             <Register />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: 'callback',
+        element: <OAuthCallback />,
       },
     ],
   },
