@@ -13,6 +13,14 @@ module.exports = {
   GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5001/api/v1/auth/google/callback',
 
   SESSION_SECRET: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
+  GROQ_API_KEYS: [
+    process.env.GROQ_API_KEY,
+    ...Object.entries(process.env)
+      .filter(([key]) => key.startsWith('GROQ_API_KEY_'))
+      .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+      .map(([_, value]) => value)
+  ].filter(Boolean),
 };
 
 

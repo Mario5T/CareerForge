@@ -1,12 +1,63 @@
 const { prisma } = require('../config/db');
 const { AppError } = require('../utils/errorHandler');
+const config = require('../config/env');
 const fs = require('fs');
 const path = require('path');
 const Groq = require('groq-sdk');
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
-});
+if (!config.GROQ_API_KEYS || !config.GROQ_API_KEYS.length) {
+  console.error('GROQ_API_KEY is not set in environment variables!');
+  console.error('Please add GROQ_API_KEY to your .env file');
+  process.exit(1);
+}
+
+console.log(`GROQ_API_KEY variants found: ${config.GROQ_API_KEYS.length}`);
+
+const groqClients = config.GROQ_API_KEYS.map((apiKey, index) => {
+  try {
+    return new Groq({ apiKey });
+  } catch (err) {
+    console.error(`Failed to initialize Groq client for key index ${index}:`, err.message);
+    return null;
+  }
+}).filter(Boolean);
+
+let currentGroqClientIndex = 0;
+
+async function callGroqWithRotation(payloadBuilder) {
+  if (!groqClients.length) {
+    throw new Error('GROQ_API_KEY is not configured');
+  }
+
+  let lastError;
+
+  for (let i = 0; i < groqClients.length; i++) {
+    const index = (currentGroqClientIndex + i) % groqClients.length;
+    const client = groqClients[index];
+
+    try {
+      const payload = typeof payloadBuilder === 'function' ? payloadBuilder() : payloadBuilder;
+      const completion = await client.chat.completions.create(payload);
+      currentGroqClientIndex = index;
+      return completion;
+    } catch (error) {
+      lastError = error;
+      const code = error?.code || error?.error?.code;
+      const status = error?.status;
+
+      console.error(`Groq LLM Error (key index ${index}):`, error.message);
+
+      if (status === 413 || code === 'rate_limit_exceeded') {
+        console.warn(`Groq rate/size limit hit on key index ${index}, trying next key if available...`);
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError || new Error('All Groq API keys failed');
+}
 
 let documentationContext = '';
 try {
@@ -20,6 +71,20 @@ try {
   }
 } catch (err) {
   console.error('Failed to load documentation:', err);
+}
+
+
+function buildLimitedDocumentationContext() {
+  if (!documentationContext) return '';
+  const maxChars = 8000;
+  if (documentationContext.length <= maxChars) return documentationContext;
+  return documentationContext.slice(0, maxChars);
+}
+
+function truncateMessageContent(content, maxChars = 2000) {
+  if (!content) return '';
+  if (content.length <= maxChars) return content;
+  return content.slice(0, maxChars);
 }
 
 
@@ -146,9 +211,12 @@ exports.handleMessage = async (userId, message) => {
     return { type: 'jobList', jobs: result.jobs };
   }
 
-  
   try {
-    const completion = await groq.chat.completions.create({
+    console.log('Calling Groq LLM for general query...');
+    const limitedDoc = buildLimitedDocumentationContext();
+    const limitedUserMessage = truncateMessageContent(message);
+
+    const completion = await callGroqWithRotation({
       messages: [
         {
           role: 'system',
@@ -158,7 +226,7 @@ exports.handleMessage = async (userId, message) => {
           
           Use the following documentation as your PRIMARY source of truth:
           =========================================
-          ${documentationContext}
+          ${limitedDoc}
           =========================================
           
           Guidelines:
@@ -171,24 +239,30 @@ exports.handleMessage = async (userId, message) => {
         },
         {
           role: 'user',
-          content: message
+          content: limitedUserMessage
         }
       ],
-      model: 'llama-3.3-70b-versatile', // Using supported 70b model
+      model: 'llama-3.3-70b-versatile',
       temperature: 0.5,
-      max_tokens: 1024,
+      max_tokens: 768,
     });
 
     const llmResponse = completion.choices[0]?.message?.content;
+    console.log('Groq LLM response received');
     
     if (llmResponse) {
       return { type: 'text', message: llmResponse };
     }
   } catch (error) {
-    console.error('Groq LLM Error:', error);
+    console.error('Groq LLM Error:', error.message);
+    console.error('Error details:', {
+      name: error.name,
+      status: error.status,
+      message: error.message
+    });
     return { 
       type: 'text', 
-      message: "I'm having a little trouble connecting to my brain right now. Please try asking again in a moment!" 
+      message: "I'm having a little trouble connecting to my brain right now. Please try again in a moment!" 
     };
   }
 

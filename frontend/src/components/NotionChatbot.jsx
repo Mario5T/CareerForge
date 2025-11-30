@@ -56,7 +56,10 @@ export default function NotionChatbot() {
     setLoading(true);
 
     try {
+      console.log('📤 Sending chatbot message:', text);
       const data = await sendMessage(text);
+      console.log('📥 Received chatbot response:', data);
+      
       if (data?.type === 'jobList') {
         setMessages((prev) => [...prev, { role: 'bot', type: 'jobList', jobs: data.jobs }]);
       } else if (data?.type === 'applications') {
@@ -66,10 +69,25 @@ export default function NotionChatbot() {
       } else if (data?.message || data?.text) {
         setMessages((prev) => [...prev, { role: 'bot', type: 'text', text: data.message || data.text }]);
       } else {
+        console.warn('⚠️ Unexpected response format:', data);
         setMessages((prev) => [...prev, { role: 'bot', type: 'text', text: 'No response.' }]);
       }
     } catch (e) {
-      setMessages((prev) => [...prev, { role: 'bot', type: 'text', text: 'Failed to connect. Please try again.' }]);
+      console.error('❌ Chatbot error:', e);
+      console.error('Error details:', {
+        message: e.message,
+        response: e.response?.data,
+        status: e.response?.status
+      });
+      
+      let errorMsg = 'Failed to connect. Please try again.';
+      if (e.response?.status === 401) {
+        errorMsg = 'Please log in to use the chatbot.';
+      } else if (e.response?.data?.message) {
+        errorMsg = e.response.data.message;
+      }
+      
+      setMessages((prev) => [...prev, { role: 'bot', type: 'text', text: errorMsg }]);
     } finally {
       setLoading(false);
     }
@@ -80,7 +98,14 @@ export default function NotionChatbot() {
       const data = await jobDetails(id);
       const text = `Job: ${data.title} at ${data.company?.name}\n\n${data.description?.substring(0, 100)}...`;
       setMessages((prev) => [...prev, { role: 'bot', type: 'text', text }]);
-    } catch {}
+    } catch (error) {
+      console.error('Failed to fetch job details:', error);
+      setMessages((prev) => [...prev, { 
+        role: 'bot', 
+        type: 'text', 
+        text: 'Sorry, I couldn\'t fetch the job details at the moment. Please try again later.' 
+      }]);
+    }
   };
 
   return (
