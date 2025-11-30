@@ -98,6 +98,10 @@ const router = createBrowserRouter([
         element: <PublicRecruiterProfile />,
       },
       {
+        path: 'auth/callback',
+        element: <OAuthCallback />,
+      },
+      {
         path: 'public/company/:id',
         element: <PublicCompanyProfile />,
       },
